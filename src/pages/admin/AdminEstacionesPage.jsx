@@ -65,7 +65,7 @@ export default function AdminEstacionesPage() {
           className={[styles.tabBtn, tab === TABS.LINEAS ? styles.tabBtnActive : ""].join(" ")}
           onClick={() => setTab(TABS.LINEAS)}
         >
-          Catálogo
+          Catálogo de líneas aéreas
         </button>
       </div>
 
