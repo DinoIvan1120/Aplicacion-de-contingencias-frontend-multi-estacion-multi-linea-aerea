@@ -1,0 +1,943 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ResumenGraficos.module.css — mobile-first con modal de expansión
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Panel contenedor ──────────────────────────────────────────────────── */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ─── Header colapsable ─────────────────────────────────────────────────── */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  gap: 0.5rem;
+}
+.panelHeader:hover {
+  background: var(--bg-hover);
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-900);
+}
+
+/* ─── Body del panel ────────────────────────────────────────────────────── */
+.panelBody {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RANGO DE FECHAS — input nativo estilizado directamente (funciona en iOS/Android)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.rangoBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.875rem;
+}
+
+.rangoInputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.rangoDivider {
+  font-size: 0.8125rem;
+  color: var(--text-400);
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.rangoField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rangoLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Input de fecha — nativo, visible, bien estilizado ─────────────────── */
+/*
+   Sin el truco opacity:0 / display:span encima.
+   El input es visible y clickeable en todos los browsers incluyendo iOS Safari
+   y Android Chrome, que bloquean el picker nativo en inputs ocultos o
+   con pointer-events manipulados.
+*/
+.rangoInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 0.625rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-900);
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  /* Normalizar apariencia en todos los browsers */
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+}
+
+.rangoInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+.rangoInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  /* Pequeño ajuste de tamaño para móvil */
+  width: 16px;
+  height: 16px;
+}
+.rangoInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ─── Botón Actualizar ───────────────────────────────────────────────────── */
+.applyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 36px;
+  padding: 0 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    background var(--transition-fast),
+    opacity var(--transition-fast);
+}
+.applyBtn:hover {
+  background: var(--primary-dark);
+}
+.applyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── KPI Cards ─────────────────────────────────────────────────────────── */
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.875rem;
+}
+
+.kpiCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  transition: box-shadow var(--transition-fast);
+  min-width: 0;
+}
+.kpiCard:hover {
+  box-shadow: var(--shadow-sm);
+}
+.kpiCard > svg {
+  flex-shrink: 0;
+}
+.kpiCard > div {
+  min-width: 0;
+}
+
+.kpiValue {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-900);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpiLabel {
+  font-size: 0.6875rem;
+  color: var(--text-500);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Fila de gráficos ──────────────────────────────────────────────────── */
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0.875rem;
+  align-items: start;
+}
+
+.chartMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  min-width: 0;
+}
+.chartSide {
+  min-width: 0;
+}
+
+/* ─── Chart Block con botón expandir ────────────────────────────────────── */
+.chartBlock {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  overflow: hidden;
+}
+
+.chartBlockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.chartTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-700);
+  flex: 1;
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg-card);
+  color: var(--text-500);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.expandBtn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ─── SVG Charts ────────────────────────────────────────────────────────── */
+.svgChart {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+  max-height: 220px;
+}
+
+.svgDonut {
+  width: 160px;
+  height: 160px;
+  align-self: center;
+}
+
+.bar {
+  transition: fill-opacity var(--transition-fast);
+}
+.bar:hover {
+  fill-opacity: 1;
+}
+.slice {
+  transition: fill-opacity var(--transition-fast);
+  cursor: pointer;
+}
+.slice:hover {
+  fill-opacity: 1;
+}
+
+/* ─── Donut wrap + leyenda ──────────────────────────────────────────────── */
+.donutWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  color: var(--text-700);
+  font-weight: 500;
+  flex: 1;
+}
+
+.legendPct {
+  color: var(--text-500);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Tabla por tipo ─────────────────────────────────────────────────────── */
+.tipoTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  table-layout: fixed;
+}
+.tipoTable th {
+  text-align: left;
+  color: var(--text-500);
+  font-weight: 500;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tipoTable td {
+  padding: 5px 6px;
+  color: var(--text-900);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tipoTable tr:last-child td {
+  border-bottom: none;
+}
+.tipoTable th:nth-child(1),
+.tipoTable td:nth-child(1) {
+  width: auto;
+}
+.tipoTable th:nth-child(2),
+.tipoTable td:nth-child(2) {
+  width: 80px;
+  text-align: right;
+}
+.tipoTable th:nth-child(3),
+.tipoTable td:nth-child(3) {
+  width: 90px;
+  text-align: right;
+}
+
+.tipoDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ─── Estados vacíos / loading ──────────────────────────────────────────── */
+.noData {
+  font-size: 0.8125rem;
+  color: var(--text-500);
+  text-align: center;
+  padding: 1rem 0;
+}
+.loading {
+  font-size: 0.875rem;
+  color: var(--text-500);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL DE EXPANSIÓN
+   ═══════════════════════════════════════════════════════════════════════════ */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: overlayIn 0.15s ease;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalIn 0.18s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-900);
+}
+
+.modalClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-500);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+.modalClose:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalBody .svgChart {
+  max-height: none;
+}
+.modalBody .svgDonut {
+  width: 200px;
+  height: 200px;
+}
+.modalBody .donutWrap {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2rem;
+}
+.modalBody .legend {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .donutWrap {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .svgDonut {
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+  }
+  .legend {
+    flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .panelBody {
+    padding: 0 0.875rem 0.875rem;
+  }
+
+  /* Fechas: en columna, botón abajo */
+  .rangoBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+  .rangoInputRow {
+    width: 100%;
+  }
+  .rangoField {
+    flex: 1;
+  }
+  .applyBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* KPIs */
+  .kpiRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.625rem;
+  }
+  .kpiCard:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .kpiCard {
+    padding: 0.75rem 0.875rem;
+    gap: 0.625rem;
+  }
+  .kpiValue {
+    font-size: 1rem;
+  }
+
+  /* Donut */
+  .donutWrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .svgDonut {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Tabla */
+  .tipoTable {
+    font-size: 0.75rem;
+  }
+  .tipoTable th:nth-child(2),
+  .tipoTable td:nth-child(2) {
+    width: 70px;
+  }
+  .tipoTable th:nth-child(3),
+  .tipoTable td:nth-child(3) {
+    width: 80px;
+  }
+
+  /* Modal */
+  .modalContent {
+    max-height: 95vh;
+    border-radius: var(--r-md);
+  }
+  .modalBody {
+    padding: 1rem;
+  }
+  .modalBody .donutWrap {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .kpiRow {
+    grid-template-columns: 1fr;
+  }
+  .kpiCard:nth-child(3) {
+    grid-column: auto;
+  }
+  .panelHeader {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLA POR PROVEEDOR INDIVIDUAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+.proveedorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.proveedorSectionTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-700);
+}
+
+.proveedorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.875rem;
+}
+
+/* proveedorCard: solo wrapper de layout; todo el estilo visual viene de chartBlock */
+.proveedorCard {
+  min-width: 0;
+}
+
+/* Asegura que el chartBlock dentro de la card llene el alto de su celda */
+.proveedorCard .chartBlock {
+  height: 100%;
+}
+
+/* ─── Título compuesto: dot + label + total ─────────────────────────────── */
+/*
+  proveedorBlockTitle vive DENTRO de chartTitleWrap (que ya tiene flex:1 y min-width:0).
+  Por eso solo necesita width:100% + display:flex para distribuir sus hijos.
+*/
+.proveedorBlockTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.proveedorDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Label ocupa el espacio sobrante y se trunca si es muy largo */
+.proveedorCardTipo {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-900);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Total siempre visible a la derecha, sin truncarse */
+.proveedorCardTotal {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-500);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── Tabla interna de proveedores ──────────────────────────────────────── */
+.proveedorTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  table-layout: fixed;
+}
+
+.proveedorTable th {
+  text-align: left;
+  color: var(--text-500);
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.proveedorTable td {
+  padding: 6px 8px;
+  color: var(--text-900);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.proveedorTable tr:last-child td {
+  border-bottom: none;
+}
+
+/* Anchos de columna — proveedor toma el espacio libre */
+.proveedorTable th:nth-child(1),
+.proveedorTable td:nth-child(1) {
+  width: auto;
+}
+.proveedorTable th:nth-child(2),
+.proveedorTable td:nth-child(2) {
+  width: 58px;
+  text-align: right;
+}
+.proveedorTable th:nth-child(3),
+.proveedorTable td:nth-child(3) {
+  width: 80px;
+  text-align: right;
+}
+.proveedorTable th:nth-child(4),
+.proveedorTable td:nth-child(4) {
+  width: 86px;
+}
+
+.proveedorNombre {
+  font-weight: 500;
+}
+
+/* Mini barra de porcentaje */
+.pctBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--text-500);
+}
+
+.pctFill {
+  height: 5px;
+  border-radius: 99px;
+  min-width: 2px;
+  opacity: 0.75;
+  flex-shrink: 0;
+  max-width: 36px;
+}
+
+/* Fila de totales */
+.proveedorFooter td {
+  font-weight: 700;
+  color: var(--text-700);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  border-bottom: none !important;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+  .donutWrap {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .svgDonut {
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+  }
+  .legend {
+    flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .panelBody {
+    padding: 0 0.875rem 0.875rem;
+  }
+
+  /* Fechas */
+  .rangoBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+  .rangoInputRow {
+    width: 100%;
+  }
+  .rangoField {
+    flex: 1;
+  }
+  .applyBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* KPIs */
+  .kpiRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.625rem;
+  }
+  .kpiCard:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .kpiCard {
+    padding: 0.75rem 0.875rem;
+    gap: 0.625rem;
+  }
+  .kpiValue {
+    font-size: 1rem;
+  }
+
+  /* Donut */
+  .donutWrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .svgDonut {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Tabla tipo */
+  .tipoTable {
+    font-size: 0.75rem;
+  }
+  .tipoTable th:nth-child(2),
+  .tipoTable td:nth-child(2) {
+    width: 70px;
+  }
+  .tipoTable th:nth-child(3),
+  .tipoTable td:nth-child(3) {
+    width: 80px;
+  }
+
+  /* Proveedores: 1 columna en móvil */
+  .proveedorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Columnas de tabla más ajustadas en móvil */
+  .proveedorTable th:nth-child(2),
+  .proveedorTable td:nth-child(2) {
+    width: 52px;
+  }
+  .proveedorTable th:nth-child(3),
+  .proveedorTable td:nth-child(3) {
+    width: 74px;
+  }
+  .proveedorTable th:nth-child(4),
+  .proveedorTable td:nth-child(4) {
+    width: 78px;
+  }
+
+  /* Modal */
+  .modalContent {
+    max-height: 95vh;
+    border-radius: var(--r-md);
+  }
+  .modalBody {
+    padding: 1rem;
+  }
+  .modalBody .donutWrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .modalBody .proveedorTable {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .kpiRow {
+    grid-template-columns: 1fr;
+  }
+  .kpiCard:nth-child(3) {
+    grid-column: auto;
+  }
+  .panelHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  /* En pantallas muy pequeñas, ocultar la mini-barra y mostrar solo el % */
+  .pctFill {
+    display: none;
+  }
+}

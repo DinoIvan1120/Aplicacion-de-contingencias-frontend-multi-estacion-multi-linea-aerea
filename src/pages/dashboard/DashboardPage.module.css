@@ -1,0 +1,370 @@
+/* =====================================================
+   AirportHub — Dashboard de módulos
+   Estética: cielo crepúsculo / atardecer aeroportuario
+   Fuentes: Syne (títulos) + IBM Plex Sans (cuerpo)
+   ===================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+
+.page {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(0.75rem, 3vh, 2rem) clamp(1rem, 3vw, 1.5rem);
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+/* ── Fondo: foto de avión con degradado cálido ── */
+.bg {
+  position: absolute;
+  inset: 0;
+  background: url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=85")
+    center / cover no-repeat;
+  z-index: 0;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(60, 10, 10, 0.82) 0%,
+    rgba(120, 35, 20, 0.78) 30%,
+    rgba(80, 20, 50, 0.75) 60%,
+    rgba(15, 10, 30, 0.9) 100%
+  );
+  z-index: 1;
+}
+
+/* ── Partículas flotantes ── */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 200, 120, 0.4);
+  z-index: 2;
+  animation: floatDot 6s ease-in-out infinite;
+}
+@keyframes floatDot {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-18px) scale(1.3);
+    opacity: 0.8;
+  }
+}
+
+/* ── Contenedor central ── */
+.container {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.9rem, 2.5vh, 1.75rem);
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Ícono de avión central ── */
+.planeRing {
+  width: clamp(52px, 7vh, 72px);
+  height: clamp(52px, 7vh, 72px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ── Bienvenida ── */
+.welcome {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.welcomeSub {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.welcomeName {
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.rolBadge {
+  margin-top: 0.25rem;
+  padding: 0.3rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(6px);
+}
+
+/* ── Info del sistema ── */
+.sysInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.sysTitle {
+  font-family: "Syne", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.sysDot {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.1rem;
+}
+.sysSub {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 300;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ── Grid de tarjetas ── */
+.grid {
+  display: grid;
+  width: 100%;
+  gap: 1.1rem;
+  /* Adapta columnas según el número de módulos */
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+
+/* Cuando hay 1 sola tarjeta — centrada, ancha */
+.grid[style*="--count: 1"] {
+  grid-template-columns: minmax(0, 360px);
+  justify-content: center;
+}
+/* 2 tarjetas */
+.grid[style*="--count: 2"] {
+  grid-template-columns: repeat(2, minmax(0, 340px));
+  justify-content: center;
+}
+
+/* ── Tarjeta de módulo ── */
+.card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.5vh, 1.75rem) 1.5rem clamp(1rem, 2vh, 1.5rem);
+  /* background: rgba(255, 255, 255, 0.08); */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease,
+    box-shadow 0.28s ease;
+  animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.015);
+  border-color: var(--accent, rgba(255, 255, 255, 0.35));
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 1px var(--accent, rgba(255, 255, 255, 0.2)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.card:active {
+  transform: translateY(-2px) scale(1.008);
+}
+
+/* Ícono de la tarjeta */
+.cardIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+.card:hover .cardIcon {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+/* Cuerpo de texto */
+.cardBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cardTitle {
+  font-family: "Syne", sans-serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  /* color: #fff; */
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.cardDesc {
+  font-size: 0.825rem;
+  /* color: rgba(255, 255, 255, 0.55); */
+  line-height: 1.55;
+  font-weight: 300;
+}
+
+/* Flecha */
+.cardArrow {
+  align-self: flex-end;
+  margin-top: auto;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+.card:hover .cardArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Brillo en hover */
+.cardShine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.card:hover .cardShine {
+  opacity: 1;
+}
+
+/* ── Botón de logout ── */
+.logoutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 2rem;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.15s;
+  margin-top: 0.5rem;
+}
+.logoutBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: scale(1.02);
+}
+.logoutBtn:active {
+  transform: scale(0.98);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .page {
+    height: auto;             /* antes: 100vh/100dvh fijo -> recortaba tarjetas */
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;        /* antes: hidden -> impedía el scroll */
+    align-items: flex-start;  /* que arranque arriba, no centrado, para poder scrollear hacia abajo */
+    padding-top: clamp(1.5rem, 5vh, 2.5rem);
+    padding-bottom: clamp(1.5rem, 5vh, 2.5rem);
+  }
+  .grid {
+    grid-template-columns: 1fr !important;
+    justify-content: unset !important;
+  }
+  .card {
+    padding: 1.5rem 1.25rem;
+  }
+  .welcomeName {
+    font-size: 1.5rem;
+  }
+  .sysTitle {
+    font-size: 0.95rem;
+  }
+}

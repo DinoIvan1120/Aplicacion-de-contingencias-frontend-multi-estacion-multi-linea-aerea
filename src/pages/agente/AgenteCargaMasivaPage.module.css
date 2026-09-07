@@ -1,0 +1,450 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+.backBtn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-900);
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-900);
+}
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.selectRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 720px) {
+  .selectRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Drop zone (mismo patrón que AdminVuelosPage) ── */
+.dropZone {
+  border: 2.5px dashed var(--border);
+  border-radius: var(--r-lg);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+.dropZone:hover,
+.dragOver {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.dropTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-900);
+}
+.dropSub {
+  font-size: 0.875rem;
+  color: var(--text-500);
+}
+.dropFormat {
+  font-size: 0.78rem;
+  color: var(--text-300);
+  max-width: 520px;
+}
+.uploadingBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ── Progreso del lote ── */
+.progressWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.progressBar {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.progressLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-700);
+  white-space: nowrap;
+}
+.spinIcon {
+  animation: spin 1.1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── NUEVO: modal de "procesando" (spinner + progreso en vivo) ── */
+.progresoModalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 1rem 0.5rem;
+}
+.progresoModalTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-800, #1f2937);
+}
+.progresoModalHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-500, #6b7280);
+  line-height: 1.4;
+}
+
+.statsRow {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.statOk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--success);
+}
+.statErr {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--danger);
+}
+
+/* ── Tabla de resultados ── */
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  color: var(--text-500);
+  font-weight: 600;
+  border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+.td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-700);
+}
+
+/* ── Tabla de resultados ──
+   Contenida en una caja con borde propio, alto máximo y scroll interno
+   (tanto vertical como horizontal) para que NUNCA empuje ni desborde al
+   modal/página que la contiene — antes el overflow-x se veía "flotando"
+   a mitad del modal sin límites claros. El thead queda pegado (sticky)
+   arriba del área con scroll para que las columnas sigan siendo legibles
+   aunque haya muchas filas. */
+.tableWrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 260px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  -webkit-overflow-scrolling: touch;
+}
+.table {
+  width: 100%;
+  min-width: 560px; /* evita que las columnas se aplasten antes de scrollear */
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  color: var(--text-500);
+  font-weight: 600;
+  background: var(--bg-card);
+  border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+.td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-700);
+  vertical-align: top;
+}
+/* Para celdas con contenido potencialmente largo (lista de integrantes,
+   mensajes de error): se recorta con "…" y el texto completo queda
+   disponible vía atributo title (tooltip nativo del navegador). */
+.tdClamp {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Vista de tarjetas (alternativa a la tabla en pantallas angostas) ──
+   Se renderiza en el DOM en paralelo a la tabla; CSS decide cuál se
+   muestra según el ancho de pantalla (ver media query al final del
+   archivo). Evita por completo el scroll horizontal en móvil, que era
+   la causa principal del desarme visual. */
+.cardList {
+  display: none;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.cardItem {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.cardItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.cardItemTitle {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-900);
+}
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+.cardRowLabel {
+  color: var(--text-500);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.cardRowValue {
+  color: var(--text-700);
+  text-align: right;
+  word-break: break-word;
+}
+.cardIntegrantes {
+  font-size: 0.78rem;
+  color: var(--text-700);
+  line-height: 1.45;
+  background: var(--bg-card);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.55rem;
+  word-break: break-word;
+}
+
+/* ── Errores de validación ── */
+.errorList {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.5rem;
+}
+.errorListTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 0.5rem;
+}
+.errorList ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.errorList li {
+  font-size: 0.82rem;
+  color: var(--text-700);
+}
+
+/* ── Errores de validación ── */
+.errorList {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.5rem;
+}
+.errorListTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 0.5rem;
+}
+.errorList ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.errorList li {
+  font-size: 0.82rem;
+  color: var(--text-700);
+  word-break: break-word;
+}
+
+.confirmFirmaRow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.confirmFirmaInput {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.confirmFirmaBtn {
+  flex-shrink: 0;
+  align-self: stretch;
+}
+.confirmFirmaInputOk {
+  border-color: var(--success) !important;
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Tablet: la tabla sigue vigente pero con menos alto visible y textos
+   algo más compactos, para que quepa mejor dentro del modal. */
+@media (max-width: 900px) {
+  .card {
+    padding: 1.25rem;
+  }
+}
+
+/* Móvil / tablet angosto: se reemplaza la tabla (que obligaba a un
+   scroll horizontal incómodo y descuadraba el modal) por una lista de
+   tarjetas apiladas — mismo dato, sin scroll lateral. */
+@media (max-width: 680px) {
+  .tableWrap {
+    display: none;
+  }
+  .cardList {
+    display: flex;
+  }
+  .statsRow {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .sectionHeaderRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dropZone {
+    padding: 1.75rem 1.25rem;
+  }
+  .errorList {
+    padding: 1rem 1.1rem;
+  }
+}

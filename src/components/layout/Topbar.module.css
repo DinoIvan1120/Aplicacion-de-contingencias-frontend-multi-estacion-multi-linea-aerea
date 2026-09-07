@@ -1,0 +1,456 @@
+/* =====================================================
+   Topbar — Desktop · Tablet · Móvil
+   ===================================================== */
+ 
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem; /* espacio mínimo garantizado entre .left y .right, aunque el contenido se apriete */
+  padding: 0 1.5rem;
+  z-index: 100;
+  transition: background var(--transition-normal);
+}
+ 
+/* ── Lados ── */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+ 
+/* ── Hamburguesa (solo móvil) ── */
+.menuBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--r-sm);
+  display: none; /* oculto en desktop */
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+.menuBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+ 
+/* ── Título / Nombre de la app ── */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+.appName {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.envBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+}
+ 
+/* ── Info del usuario ── */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.userName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rolLabel {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+}
+ 
+/* ── Botón compacto de rol (solo móvil) ── */
+.roleWrap {
+  display: none; /* en desktop se usa .userInfo, siempre visible */
+  position: relative;
+}
+.roleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.roleBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+.rolePanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(11, 31, 78, 0.22);
+  padding: 10px 14px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+.rolePanelName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-900, #0b1f4e);
+}
+.rolePanelLabel {
+  font-size: 0.75rem;
+  color: var(--text-500, #7485a0);
+}
+ 
+/* ── Botón de logout ── */
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--r-md);
+  padding: 6px 12px 6px 10px;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform 100ms;
+  color: #fff;
+}
+.logoutBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+.logoutBtn:active {
+  transform: scale(0.96);
+}
+ 
+.logoutLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+ 
+/* =====================================================
+   Diálogo de confirmación de cierre de sesión
+   ===================================================== */
+ 
+/* Overlay oscuro detrás del diálogo */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+ 
+/* Animaciones del overlay */
+.overlayIn {
+  animation: fadeIn 0.2s ease both;
+}
+.overlayOut {
+  animation: fadeOut 0.2s ease both;
+}
+ 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+ 
+/* Card del diálogo */
+.dialog {
+  background: var(--bg-card);
+  border-radius: var(--r-xl);
+  padding: 2rem 2rem 1.75rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  text-align: center;
+}
+ 
+/* Animaciones de entrada / salida del diálogo */
+.dialogIn {
+  animation: dialogEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dialogOut {
+  animation: dialogLeave 0.2s ease both;
+}
+ 
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes dialogLeave {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+}
+ 
+/* Ícono */
+.dialogIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+ 
+/* Cuerpo de texto */
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+ 
+.dialogTitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-900);
+}
+ 
+.dialogDesc {
+  font-size: 0.875rem;
+  color: var(--text-500);
+  line-height: 1.55;
+  max-width: 300px;
+}
+ 
+/* Botones */
+.dialogActions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+ 
+.cancelBtn {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-card);
+  color: var(--text-700);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.cancelBtn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-500);
+}
+ 
+.confirmBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    transform 100ms;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+}
+.confirmBtn:hover {
+  background: #b91c1c;
+}
+.confirmBtn:active {
+  transform: scale(0.97);
+}
+ 
+/* =====================================================
+   Responsive — Tablet (≤ 1024px)
+   ===================================================== */
+@media (max-width: 1024px) {
+  .userName {
+    max-width: 150px;
+  }
+  .logoutLabel {
+    display: none;
+  } /* solo ícono en tablet */
+  .logoutBtn {
+    padding: 7px 9px;
+  }
+}
+ 
+/* =====================================================
+   Responsive — Móvil (≤ 768px)
+   ===================================================== */
+@media (max-width: 768px) {
+  .topbar {
+    left: 0;
+    padding: 0 0.875rem;
+    gap: 0.5rem; /* espacio mínimo entre el badge DEV y el selector de aeropuerto */
+  }
+  .menuBtn {
+    display: flex;
+  }
+  .appName {
+    display: none; /* redundante en móvil: ya aparece en el sidebar */
+  }
+  .left {
+    gap: 0.5rem;
+  }
+  .right {
+    gap: 0.5rem;
+  }
+  .userInfo {
+    display: none;
+  } /* nombre/rol oculto en móvil: se reemplaza por .roleWrap */
+  .roleWrap {
+    display: block;
+  }
+  .logoutLabel {
+    display: none;
+  }
+  .logoutBtn {
+    flex-shrink: 0;
+  }
+ 
+  /* Diálogo de confirmación: ocupa casi toda la pantalla en móvil */
+  .dialog {
+    max-width: 100%;
+    border-radius: var(--r-lg);
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+}
+ 
+/* =====================================================
+   Responsive — Móvil muy angosto (≤ 400px)
+   ===================================================== */
+@media (max-width: 400px) {
+  .topbar {
+    padding: 0 0.625rem;
+  }
+}
+ 
+/* =====================================================
+   Responsive — Pantallas muy pequeñas (≤ 380px)
+   ===================================================== */
+@media (max-width: 380px) {
+  .topbar {
+    padding: 0 1rem;
+  }
+  .appName {
+    font-size: 0.95rem;
+  }
+  .dialogActions {
+    flex-direction: column;
+  }
+}
+ 
+/* =====================================================
+   Responsive — Pantallas ultra angostas (≤ 340px, ej. 320px)
+   Se ajusta espaciado y tamaños para evitar que el badge DEV,
+   el selector de aeropuerto y los íconos se amontonen.
+   ===================================================== */
+@media (max-width: 340px) {
+  .topbar {
+    padding: 0 0.625rem;
+    gap: 0.375rem;
+  }
+  .left {
+    gap: 0.375rem;
+  }
+  .right {
+    gap: 0.375rem;
+  }
+  .envBadge {
+    font-size: 0.62rem;
+    padding: 2px 6px;
+  }
+  .roleBtn {
+    width: 26px;
+    height: 26px;
+  }
+  .logoutBtn {
+    padding: 6px 7px;
+  }
+}

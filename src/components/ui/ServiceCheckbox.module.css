@@ -1,0 +1,17 @@
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-700);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--primary); background: var(--primary-light); }
+.label { font-weight: 500; }
+.active .label { font-weight: 600; }

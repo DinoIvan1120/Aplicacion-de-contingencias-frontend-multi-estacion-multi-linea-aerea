@@ -1,0 +1,220 @@
+.wrap {
+  position: relative;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.badgeClickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.badgeClickable:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.badgeText {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fondo oscuro detrás del panel — solo visible en móvil (ver media query) */
+.overlay {
+  display: none;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(11, 31, 78, 0.22);
+  padding: 12px;
+  min-width: 260px;
+  max-width: 460px;
+}
+
+.panelHeader {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7485a0;
+  padding: 2px 4px 10px;
+}
+
+.grid {
+  display: flex;
+  gap: 10px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 190px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.colTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #7485a0;
+  padding: 2px 6px 4px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #0b1f4e;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.option:hover,
+.optionHover {
+  background: #eef2fb;
+}
+
+.optionActive {
+  background: #0b1f4e;
+  color: #fff;
+}
+
+.optionCode {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(11, 31, 78, 0.08);
+  color: #0b1f4e;
+}
+
+.optionActive .optionCode {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.skipBtn {
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: #3d5070;
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.skipBtn:hover {
+  text-decoration: underline;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: #7485a0;
+  padding: 6px;
+}
+
+/* =====================================================
+   Responsive — Móvil (≤ 768px)
+   ===================================================== */
+@media (max-width: 768px) {
+  .badge {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+  .badgeText {
+    max-width: 34vw; /* se achica junto con el ancho de pantalla en vez de un valor fijo */
+  }
+
+  /* En móvil el panel deja de ser un popover anclado al badge (se salía de
+     pantalla) y pasa a ser un modal centrado, igual que el diálogo de
+     cerrar sesión: fondo oscuro + tarjeta centrada en el viewport. */
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 199;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: estacionOverlayIn 0.2s ease both;
+  }
+  .panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: calc(100vw - 2rem);
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: estacionPanelIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .grid {
+    flex-direction: column;
+  }
+  .col {
+    min-width: 0;
+  }
+}
+
+@keyframes estacionOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes estacionPanelIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* =====================================================
+   Responsive — Pantallas ultra angostas (≤ 340px, ej. 320px)
+   ===================================================== */
+@media (max-width: 340px) {
+  .badge {
+    padding: 4px 6px;
+    font-size: 0.68rem;
+    gap: 3px;
+  }
+}

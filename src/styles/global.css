@@ -1,0 +1,159 @@
+/* ===================================================
+   AirportHub SAASA — Design System Global
+   =================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+:root {
+  /* Fondos */
+  --bg:            #F6F3EE;
+  --bg-card:       #FFFFFF;
+  --bg-hover:      #F0ECE4;
+
+  /* Color primario — índigo del login */
+  --primary:       #4F46E5;
+  --primary-light: #E0E7FF;
+  --primary-dark:  #3730A3;
+  --accent:        #DC2626;
+
+  /* Colores por rol */
+  --rol-lider:     #DC2626;
+  --rol-agente:    #16A34A;
+  --rol-aerea:     #7C3AED;
+  --rol-admin:     #EA580C;
+  --rol-prov:      #0284C7;
+
+  /* Sidebar */
+  --sidebar-bg:     #1E293B;
+  --sidebar-text:   #94A3B8;
+  --sidebar-active: #4F46E5;
+
+  /* Texto */
+  --text-900: #111827;
+  --text-700: #374151;
+  --text-500: #6B7280;
+  --text-300: #9CA3AF;
+
+  /* Bordes */
+  --border:       #E5DED3;
+  --border-focus: #4F46E5;
+
+  /* Estados semánticos */
+  --success:    #15803D;
+  --success-bg: #DCFCE7;
+  --warning:    #B45309;
+  --warning-bg: #FEF3C7;
+  --danger:     #DC2626;
+  --danger-bg:  #FEE2E2;
+  --info:       #1D4ED8;
+  --info-bg:    #DBEAFE;
+
+  /* Tipografía */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Layout */
+  --sidebar-w: 264px;
+  --topbar-h:  64px;
+
+  /* Radios */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.10);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+
+  /* Transiciones */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms ease;
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-900);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+}
+
+/* ===== Focus visible global ===== */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== Animaciones ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== Utilidades globales ===== */
+.page-enter {
+  animation: fadeUp 0.3s ease both;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

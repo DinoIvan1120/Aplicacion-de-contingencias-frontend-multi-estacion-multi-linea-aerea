@@ -1,0 +1,482 @@
+/* =====================================================
+   AirportHub — Selección de Estación / Aerolínea (Fase 5)
+   Misma estética que DashboardPage: cielo crepúsculo aeroportuario
+   ===================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: clamp(1.5rem, 5vh, 3rem) clamp(1rem, 3vw, 1.5rem);
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background: url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=85")
+    center / cover no-repeat;
+  z-index: 0;
+}
+
+.bgOverlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(60, 10, 10, 0.82) 0%,
+    rgba(120, 35, 20, 0.78) 30%,
+    rgba(80, 20, 50, 0.75) 60%,
+    rgba(15, 10, 30, 0.9) 100%
+  );
+  z-index: 1;
+}
+
+.container {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1080px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2.5vh, 1.75rem);
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.planeRing {
+  width: clamp(48px, 6.5vh, 64px);
+  height: clamp(48px, 6.5vh, 64px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.headerSub {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.headerTitle {
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.headerHint {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+}
+.headerHint strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.backLink {
+  align-self: center;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  margin-bottom: 0.35rem;
+  transition: color 0.15s;
+}
+.backLink:hover {
+  color: #fff;
+}
+
+.emptyHint {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.92rem;
+  text-align: center;
+  max-width: 420px;
+}
+
+/* ── Grid de estaciones ── */
+.grid {
+  display: grid;
+  width: 100%;
+  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fit, 270px);
+  justify-content: center;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--border, #e5ded3);
+  border-radius: 16px;
+  background: var(--bg-card, #fff);
+  cursor: pointer;
+  text-align: left;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease,
+    box-shadow 0.28s ease;
+  animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: var(--primary, #4f46e5);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(79, 70, 229, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.card:active {
+  transform: translateY(-1px) scale(1.005);
+}
+
+/* ── Foto de la estación (igual que en Administrador → Estaciones) ── */
+.fotoWrapper {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 8px 8px 0;
+  background: var(--bg-card, #fff);
+}
+
+.fotoInner {
+  width: 100%;
+  height: 140px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.fotoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition:
+    transform 0.35s ease,
+    filter 0.25s ease;
+}
+.card:hover .fotoImg {
+  transform: scale(1.04);
+  filter: brightness(0.9);
+}
+
+.fotoPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #97a3b6;
+  background: linear-gradient(160deg, #eef1f6 0%, #e3e8f0 100%);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.cardBody {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardCode {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #0b1f4e;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.cardName {
+  font-family: "Syne", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-900, #111827);
+  line-height: 1.28;
+  margin: 0;
+}
+.cardShine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.card:hover .cardShine {
+  opacity: 1;
+}
+
+/* ── Grid de aerolíneas ── */
+.gridAirlines {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  /* Columnas de ancho fijo (190px) sin importar cuántas aerolíneas haya:
+     nunca se estiran, y el grupo completo queda centrado en el
+     contenedor gracias a justify-content. */
+  grid-template-columns: repeat(auto-fit, 185px);
+  justify-content: center;
+}
+
+.airlineCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1.4rem 1rem 1.1rem;
+  border: 1px solid var(--border, #e5ded3);
+  border-radius: 16px;
+  background: var(--bg-card, #fff);
+  cursor: pointer;
+  text-align: center;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease,
+    box-shadow 0.28s ease;
+  animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.airlineCard:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--primary, #4f46e5);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(79, 70, 229, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.airlineLogo {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--border, #e5ded3);
+  box-shadow:
+    0 2px 8px rgba(11, 31, 78, 0.1),
+    0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* Wrapper del ícono de una opción de modo + su botón de editar — el
+   círculo (.airlineLogo) tiene overflow:hidden para recortar la imagen,
+   así que el botón de editar vive en este wrapper, no dentro de él, o
+   quedaría recortado. */
+.iconWithEdit {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Botón pequeño para subir/cambiar el ícono de una opción de modo
+   (Seleccionar Modo, admin global) — mismo rol que el overlay de cámara
+   en las tarjetas de Estaciones/Aerolíneas del panel admin, en miniatura. */
+.iconEditBtn {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #111827;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.iconEditBtn:hover {
+  background: #000;
+  transform: scale(1.08);
+}
+
+.airlineLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.airlineName {
+  font-size: 0.75rem;
+  color: var(--text-500, #6b7280);
+  font-weight: 300;
+  line-height: 1.3;
+}
+
+.airlineFlightBadge {
+  margin-top: 0.15rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary, #4f46e5);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.airlineLogoFallback {
+  /* ACTUALIZADO — antes era "none" y un onError en el <img> lo pasaba a
+     "flex" a mano. Ahora AirlineLogo renderiza en JSX uno u otro (nunca
+     los dos a la vez), así que el fallback debe verse apenas se monta. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  background: #0b1f4e;
+  color: #fff;
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.airlineCode {
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-900, #111827);
+}
+
+.airlineName {
+  font-size: 0.75rem;
+  color: var(--text-500, #6b7280);
+  font-weight: 300;
+  line-height: 1.3;
+}
+
+/* ── Botón "continuar sin filtrar" ── */
+.skipBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  transition: color 0.15s;
+}
+.skipBtn:hover {
+  color: #fff;
+}
+
+/* ── Botón de logout ── */
+.logoutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.7rem 1.75rem;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.15s;
+  margin-top: 0.5rem;
+}
+.logoutBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: scale(1.02);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .grid,
+  .gridAirlines {
+    grid-template-columns: 1fr;
+  }
+  .headerTitle {
+    font-size: 1.4rem;
+  }
+}

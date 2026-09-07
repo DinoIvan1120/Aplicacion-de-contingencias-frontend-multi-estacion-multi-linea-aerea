@@ -1,0 +1,29 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.iconWrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-900);
+}
+.message {
+  font-size: 0.9rem;
+  color: var(--text-700);
+  line-height: 1.6;
+  max-width: 340px;
+  white-space: pre-line;
+}

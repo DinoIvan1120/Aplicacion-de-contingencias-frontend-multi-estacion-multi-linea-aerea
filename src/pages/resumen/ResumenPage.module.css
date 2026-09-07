@@ -1,0 +1,15 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+.pageHeader {
+  display: flex;
+  align-items: center;
+}
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-900);
+}

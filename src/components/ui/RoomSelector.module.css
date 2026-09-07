@@ -1,0 +1,44 @@
+.wrap { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.info { display: flex; flex-direction: column; gap: 2px; }
+.label { font-weight: 600; font-size: 0.9rem; color: var(--text-900); }
+.sub   { font-size: 0.78rem; color: var(--text-500); }
+.available { font-size: 0.78rem; color: var(--info); font-weight: 500; }
+.soldOut   { font-size: 0.78rem; color: var(--danger); font-weight: 600; }
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-700);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.btn:not(:disabled):hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.count { font-size: 1rem; font-weight: 700; min-width: 24px; text-align: center; color: var(--text-900); }
