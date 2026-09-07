@@ -108,9 +108,9 @@ export default function SeleccionarAerolineaPage() {
             <p className={styles.emptyHint}>
               Esta estación no tiene líneas aéreas habilitadas todavía.
             </p>
-            <button className={styles.skipBtn} onClick={() => confirmar(null)}>
+            {/* <button className={styles.skipBtn} onClick={() => confirmar(null)}>
               Continuar sin aerolínea →
-            </button>
+            </button> */}
           </>
         ) : (
           <>
