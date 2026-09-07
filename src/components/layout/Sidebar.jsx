@@ -85,7 +85,7 @@ const NAV_BY_SECTION = {
   // debe mostrar Proveedores/Correos/Usuarios/Vuelos/Reportes/etc., solo
   // el propio ítem de Estaciones.
   "/admin-catalogo": {
-    label: "Catálogo global",
+    //label: "Catálogo global",
     color: "var(--rol-admin)",
     items: [
       {
