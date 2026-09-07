@@ -51,7 +51,7 @@ export default function SeleccionarModoAdminPage() {
           </p>
         </div>
 
-        <div className={styles.gridAirlines}>
+         <div className={styles.grid}>
           <OpcionModo
             clave="GESTIONAR"
             nombre="Gestionar Estaciones y Aerolíneas"
@@ -100,7 +100,7 @@ function OpcionModo({ clave, nombre, DefaultIcon, gradient, onClick }) {
   const mostrarImagen = !isLoading && !isError && iconoUrl;
 
   const handleEditClick = (e) => {
-    e.stopPropagation(); // no disparar la navegación de la tarjeta
+    e.stopPropagation();
     inputRef.current?.click();
   };
 
@@ -111,8 +111,7 @@ function OpcionModo({ clave, nombre, DefaultIcon, gradient, onClick }) {
     try {
       await subirIcono.mutateAsync({ clave, file });
     } catch {
-      // Silencioso: la tarjeta simplemente sigue mostrando el ícono
-      // genérico si la subida falla, sin bloquear el flujo de navegación.
+      // Silencioso...
     }
   };
 
@@ -120,44 +119,47 @@ function OpcionModo({ clave, nombre, DefaultIcon, gradient, onClick }) {
     <div
       role="button"
       tabIndex={0}
-      className={styles.airlineCard}
+      className={styles.card}
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onClick();
       }}
     >
-      <span className={styles.iconWithEdit}>
-        <span className={styles.airlineLogo}>
+      <div className={styles.fotoWrapper}>
+        <div className={styles.fotoInner}>
           {mostrarImagen ? (
-            <img src={iconoUrl} alt="" />
+            <img src={iconoUrl} alt="" className={styles.fotoImg} />
           ) : (
-            <span
-              className={styles.airlineLogoFallback}
-              style={{ background: gradient }}
+            <div
+              className={styles.fotoPlaceholder}
+              style={{ background: gradient, color: "#fff" }}
             >
-              <DefaultIcon size={22} />
-            </span>
+              <DefaultIcon size={30} />
+            </div>
           )}
-        </span>
-        <button
-          type="button"
-          className={styles.iconEditBtn}
-          onClick={handleEditClick}
-          disabled={subirIcono.isPending}
-          title={mostrarImagen ? "Cambiar ícono" : "Subir ícono"}
-        >
-          <Camera size={12} />
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png,image/jpeg"
-          style={{ display: "none" }}
-          onClick={(e) => e.stopPropagation()}
-          onChange={handleFileChange}
-        />
-      </span>
-      <span className={styles.airlineName}>{nombre}</span>
+          <button
+            type="button"
+            className={styles.fotoEditBtn}
+            onClick={handleEditClick}
+            disabled={subirIcono.isPending}
+            title={mostrarImagen ? "Cambiar ícono" : "Subir ícono"}
+          >
+            <Camera size={14} />
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/png,image/jpeg"
+            style={{ display: "none" }}
+            onClick={(e) => e.stopPropagation()}
+            onChange={handleFileChange}
+          />
+        </div>
+      </div>
+      <div className={styles.cardBodyCentered}>
+        <h3 className={styles.cardName}>{nombre}</h3>
+      </div>
+      <div className={styles.cardShine} />
     </div>
   );
 }
