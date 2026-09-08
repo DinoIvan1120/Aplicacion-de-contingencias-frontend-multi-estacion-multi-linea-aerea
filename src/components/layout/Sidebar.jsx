@@ -95,6 +95,10 @@ const NAV_BY_SECTION = {
       },
     ],
   },
+  "/admin-catalogo-usuarios": {
+    color: "var(--rol-admin)",
+    items: [{ to: "/admin/usuarios", icon: UserCog, label: "Usuarios" }],
+  },
 };
 
 /* Menú fijo por rol (cuando el path no coincide con ninguna sección) */
@@ -107,7 +111,7 @@ const NAV_FALLBACK = {
 };
 
 /* Determina qué sección del menú mostrar según el path actual */
-function resolveSection(pathname, rol) {
+function resolveSection(pathname, rol,enModoCatalogoGlobal) {
   // ── Administrador Global en /admin/estaciones (modo catálogo) ──
   // Debe evaluarse ANTES del prefijo genérico "/admin", que trae el
   // panel operativo completo.
@@ -148,7 +152,7 @@ export default function Sidebar({ open, onClose }) {
   const enModoCatalogoGlobal = esAdministradorGlobal && !estacionActiva;
 
   // Detectar sección actual por path
-  const section = resolveSection(location.pathname, rol);
+  const section = resolveSection(location.pathname, rol,enCatalogoGlobal);
   //const rolColor = section?.color ?? getRolColor(rol);
   const rolColor = getRolColor(rol);
   // El ítem "Carga masiva (Excel)" solo se muestra dentro de la sección
