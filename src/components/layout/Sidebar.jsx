@@ -152,7 +152,7 @@ export default function Sidebar({ open, onClose }) {
   const enModoCatalogoGlobal = esAdministradorGlobal && !estacionActiva;
 
   // Detectar sección actual por path
-  const section = resolveSection(location.pathname, rol,enCatalogoGlobal);
+  const section = resolveSection(location.pathname, rol,enModoCatalogoGlobal);
   //const rolColor = section?.color ?? getRolColor(rol);
   const rolColor = getRolColor(rol);
   // El ítem "Carga masiva (Excel)" solo se muestra dentro de la sección
