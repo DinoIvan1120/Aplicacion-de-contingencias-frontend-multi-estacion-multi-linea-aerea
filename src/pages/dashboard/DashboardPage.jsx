@@ -197,15 +197,16 @@ export default function DashboardPage() {
 
   // Botón inferior del dashboard (Fase 5):
   // - Administrador Global: NO cierra sesión, solo lo regresa al selector de
-  //   estación para que pueda entrar a operar otra estación sin reloguear.
-  //   Se limpia estacionActiva/lineaAereaActiva para que el selector no
-  //   arrastre el contexto de trabajo anterior.
+  //   aerolínea de la MISMA estación en la que ya está operando, para que
+  //   pueda cambiar de aerolínea sin volver a elegir estación ni reloguear.
+  //   Se mantiene estacionActiva y solo se limpia lineaAereaActiva para que
+  //   el selector no arrastre la aerolínea de la sesión anterior.
   // - Cualquier otro usuario (con estación fija o varias asignadas): se
   //   mantiene el comportamiento actual, cerrar sesión.
     const handleVolver = () => {
       if (esAdministradorGlobal) {
-        seleccionarEstacion(null);
-        navigate("/seleccionar-estacion");
+        seleccionarEstacion(estacionActiva, null);
+        navigate("/seleccionar-aerolinea", { state: { estacion: estacionActiva } });
       } else {
         logout();
       }
@@ -316,7 +317,7 @@ export default function DashboardPage() {
               strokeLinejoin="round"
             />
           </svg>
-          {esAdministradorGlobal ? "Volver a selección de estación" : "Volver al inicio de sesión"}
+          {esAdministradorGlobal ? "Volver a selección de aerolínea" : "Volver al inicio de sesión"}
         </button>
       </div>
     </div>
