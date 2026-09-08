@@ -114,6 +114,10 @@ function resolveSection(pathname, rol) {
   if (pathname.startsWith("/admin/estaciones")) {
     return NAV_BY_SECTION["/admin-catalogo"];
   }
+
+  if (pathname.startsWith("/admin/usuarios") && enModoCatalogoGlobal) {
+    return NAV_BY_SECTION["/admin-catalogo-usuarios"];
+  }     
   // ── LIDER_SAASA en /admin/proveedores: menú reducido con su color ──
   if (rol === "LIDER_SAASA" && pathname.startsWith("/admin/proveedores")) {
     return NAV_BY_SECTION["/lider-proveedores"];
@@ -141,6 +145,8 @@ export default function Sidebar({ open, onClose }) {
   const location = useLocation();
   const { vueloSeleccionado } = useAgenteAtencion();
 
+  const enModoCatalogoGlobal = esAdministradorGlobal && !estacionActiva;
+
   // Detectar sección actual por path
   const section = resolveSection(location.pathname, rol);
   //const rolColor = section?.color ?? getRolColor(rol);
@@ -158,8 +164,10 @@ export default function Sidebar({ open, onClose }) {
   // En modo catálogo (/admin/estaciones) el Administrador Global nunca
   // eligió una estación, así que no existe ningún dashboard al que volver
   // — se le regresa a la pantalla de Seleccionar Modo en su lugar.
-  const enCatalogoGlobal =
-    esAdministradorGlobal && location.pathname.startsWith("/admin/estaciones");
+   const enCatalogoGlobal =
+    enModoCatalogoGlobal &&
+    (location.pathname.startsWith("/admin/estaciones") ||
+      location.pathname.startsWith("/admin/usuarios"));
   //const navItems = section?.items ?? [];
 
   

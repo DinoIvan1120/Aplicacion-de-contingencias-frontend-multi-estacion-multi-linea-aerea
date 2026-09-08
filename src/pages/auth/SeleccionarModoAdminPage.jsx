@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, MapPinned, Camera } from "lucide-react";
+import { Building2, MapPinned,UserCog, Camera } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useIconoModo, useSubirIconoModo } from "../../hooks/useIconosModo";
 import styles from "./SeleccionSharedPage.module.css";
@@ -58,6 +58,14 @@ export default function SeleccionarModoAdminPage() {
             DefaultIcon={Building2}
             gradient="linear-gradient(135deg, var(--rol-admin, #EA580C), #F97316)"
             onClick={() => navigate("/admin/estaciones")}
+          />
+
+          <OpcionModo
+            clave="USUARIOS"
+            nombre="Gestionar Usuarios"
+            DefaultIcon={UserCog}
+            gradient="linear-gradient(135deg, #0F766E, #14B8A6)"
+            onClick={() => navigate("/admin/usuarios")}
           />
 
           <OpcionModo

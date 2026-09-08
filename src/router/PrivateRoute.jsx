@@ -10,6 +10,8 @@ const RUTAS_SELECCION = [
   "/seleccionar-aerolinea",
 ];
 
+const RUTAS_CATALOGO_GLOBAL = ["/admin/estaciones", "/admin/usuarios"];
+
 export default function PrivateRoute() {
   const { token, isLoading, user, estacionActiva, esAdministradorGlobal } =
     useAuth();
@@ -41,9 +43,12 @@ export default function PrivateRoute() {
     !!user &&
     !user.lineaAereaFija &&
     !estacionActiva &&
-    !(esAdministradorGlobal && location.pathname === "/admin/estaciones");
+    !(
+      esAdministradorGlobal &&
+      RUTAS_CATALOGO_GLOBAL.some((ruta) => location.pathname.startsWith(ruta))
+    );
 
-  if (necesitaSeleccion && !RUTAS_SELECCION.includes(location.pathname)) {
+ if (necesitaSeleccion && !RUTAS_SELECCION.includes(location.pathname)) {
     return (
       <Navigate
         to={esAdministradorGlobal ? "/seleccionar-modo" : "/seleccionar-estacion"}
