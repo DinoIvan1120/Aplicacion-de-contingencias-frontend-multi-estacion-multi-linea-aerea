@@ -140,7 +140,7 @@ function resolveSection(pathname, rol) {
 }
 
 export default function Sidebar({ open, onClose }) {
-  const { rol, esAdministradorGlobal } = useAuth();
+  const { rol, esAdministradorGlobal,estacionActiva } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { vueloSeleccionado } = useAgenteAtencion();
