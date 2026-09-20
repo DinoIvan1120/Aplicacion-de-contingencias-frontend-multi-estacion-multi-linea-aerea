@@ -1,10 +1,10 @@
 /* =====================================================
    AirportHub SAASA — Auth Page
    Estética: dark cockpit / aviation ops
-   Fuentes: Syne (display) + IBM Plex Sans (body)
+   Fuentes: Space Grotesk (display) + Inter (body) — igual que BDS
    ===================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 /* ── Reset local ───────────────────────────────────── */
 .page * {
@@ -18,8 +18,11 @@
   height: 100vh;        /* antes: min-height: 100vh */
   height: 100dvh;        /* alto real en móviles: descuenta la barra de direcciones */
   overflow: hidden;      /* evita que crezca más allá del viewport */
-  font-family: "IBM Plex Sans", sans-serif;
-  background: #03080f;
+  font-family: "Inter", sans-serif;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(46, 160, 67, 0.14), transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(56, 139, 253, 0.12), transparent 45%),
+    #0a0e14;
 }
 
 /* =====================================================
@@ -31,7 +34,10 @@
   height: 100dvh;
   position: relative;
   overflow: hidden;
-  background: #03080f;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(46, 160, 67, 0.14), transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(56, 139, 253, 0.12), transparent 45%),
+    #0a0e14;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -121,7 +127,7 @@
   right: 0;
   bottom: 0;
   width: 140px;
-  background: linear-gradient(to right, transparent, #03080f);
+  background: linear-gradient(to right, transparent, #0a0e14);
   pointer-events: none;
 }
 
@@ -153,7 +159,7 @@
   justify-content: center;
 }
 .brandName {
-  font-family: "Syne", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
@@ -211,7 +217,7 @@
 }
 
 .heroTitle {
-  font-family: "Syne", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(2.6rem, 4.8vw, 2.9rem); /* combina vh además de vw para que también reaccione a pantallas bajas */
   font-weight: 800;
   color: #fff;
@@ -241,7 +247,7 @@
   padding-left: 0.875rem;
 }
 .statVal {
-  font-family: "Syne", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
   color: #00b4ff;
@@ -335,7 +341,7 @@
 }
 
 .formTitle {
-  font-family: "Syne", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #0b1f4e;
@@ -449,7 +455,7 @@
   border: 1.5px solid #dce4f0;
   border-radius: 10px;
   font-size: 0.9rem;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   color: #0b1f4e;
   background: #fff;
   outline: none;
@@ -466,7 +472,7 @@
 }
 /* Código de verificación — tipografía monoespaciada */
 .codeInput {
-  font-family: "IBM Plex Mono", "Courier New", monospace !important;
+  font-family: "Courier New", monospace !important;
   font-size: 1.05rem !important;
   letter-spacing: 0.2em;
 }
@@ -527,7 +533,7 @@
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 600;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   cursor: pointer;
   letter-spacing: 0.015em;
   transition:
@@ -587,7 +593,7 @@
   background: none;
   border: none;
   font-size: 0.855rem;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   color: #3d5070;
   cursor: pointer;
   font-weight: 500;
@@ -670,7 +676,7 @@
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   cursor: pointer;
   transition: background 150ms;
   box-shadow: 0 4px 12px rgba(11, 31, 78, 0.25);
