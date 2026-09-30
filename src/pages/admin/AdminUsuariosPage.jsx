@@ -25,7 +25,7 @@ import {
 import { useEstaciones, useLineasDeEstacion } from "../../hooks/useEstaciones";
 import { useAuth } from "../../context/AuthContext";
 import { ROLES } from "../../utils/constants";
-import { getRolLabel } from "../../utils/roleUtils";
+import { getRolLabel, permiteLoginPorDni } from "../../utils/roleUtils";
 import Button from "../../components/ui/Button.jsx";
 import Badge from "../../components/ui/Badge.jsx";
 import Modal from "../../components/ui/Modal.jsx";
@@ -212,8 +212,8 @@ export default function AdminUsuariosPage() {
     const e = {};
     if (!form.nombre) e.nombre = "Requerido";
     if (!form.apellido) e.apellido = "Requerido";
-    // if (!form.correo) e.correo = "Requerido";
-    if (!form.correo && form.rol !== "AGENTE_SAASA") e.correo = "Requerido";
+    // Correo opcional solo para roles con login por DNI (Agente y Líder SAASA)
+    if (!form.correo?.trim() && !permiteLoginPorDni(form.rol)) e.correo = "Requerido";
     if (!form.documento) e.documento = "Requerido";
     //if (!form.codigoEmpleado) e.codigoEmpleado = "Requerido";
 
@@ -236,11 +236,9 @@ export default function AdminUsuariosPage() {
     try {
       const payload = { ...form };
       if (!payload.password) delete payload.password;
-      // ✅ Para AGENTE_SAASA: si correo está vacío, enviarlo como null
-      // Para otros roles: el correo es obligatorio (validate() ya lo garantiza)
-      if (payload.rol === "AGENTE_SAASA" && !payload.correo?.trim()) {
-        payload.correo = null;
-      }
+      // Correo vacío se envía como null (Agente y Líder SAASA pueden no tener correo).
+      // Para otros roles el correo es obligatorio (validate() ya lo garantiza).
+      payload.correo = payload.correo?.trim() ? payload.correo.trim() : null;
       if (editId) {
         await actualizar.mutateAsync({ id: editId, ...payload });
         showModal(
@@ -483,7 +481,7 @@ export default function AdminUsuariosPage() {
                       {u.apellido}, {u.nombre}
                     </strong>
                   </td>
-                  <td className={styles.td}>{u.correo}</td>
+                  <td className={styles.td}>{u.correo || "—"}</td>
                   <td className={styles.td}>{u.documento ?? "—"}</td>
                   <td className={styles.td}>{u.codigoEmpleado ?? "—"}</td>
                   <td className={styles.td}>
@@ -590,7 +588,7 @@ export default function AdminUsuariosPage() {
           /> */}
           <Input
             label={
-              form.rol === "AGENTE_SAASA"
+              permiteLoginPorDni(form.rol)
                 ? "Correo electrónico (opcional)"
                 : "Correo electrónico"
             }
@@ -600,11 +598,11 @@ export default function AdminUsuariosPage() {
             onChange={handleFormChange}
             error={errors.correo}
             placeholder={
-              form.rol === "AGENTE_SAASA"
+              permiteLoginPorDni(form.rol)
                 ? "Sin correo — login por DNI"
                 : "usuario@saasa.com"
             }
-            required={form.rol !== "AGENTE_SAASA"}
+            required={!permiteLoginPorDni(form.rol)}
           />
 
           <div className={styles.formGrid}>

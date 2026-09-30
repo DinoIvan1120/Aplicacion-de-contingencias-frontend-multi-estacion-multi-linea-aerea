@@ -7,7 +7,7 @@ import styles from "./LoginPage.module.css";
 
 const VIEW = { LOGIN: "login", FORGOT: "forgot", RESET: "reset" };
 
-// Modo de login: correo (todos los roles) o DNI (solo AGENTE_SAASA)
+// Modo de login: correo (todos los roles) o DNI (AGENTE_SAASA y LIDER_SAASA)
 const LOGIN_MODE = { CORREO: "correo", DNI: "dni" };
 
 export default function LoginPage() {
@@ -25,7 +25,7 @@ export default function LoginPage() {
   });
 
   // ── Estado forgot ─────────────────────────────────────────────────────────
-  // forgotMode se hereda del loginMode: si el agente llegó con DNI,
+  // forgotMode se hereda del loginMode: si el agente/líder llegó con DNI,
   // la recuperación también usa DNI.
   const [forgotMode, setForgotMode] = useState(LOGIN_MODE.CORREO);
   const [forgotCorreo, setForgotCorreo] = useState("");
@@ -239,7 +239,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     } else {
-      // Modo DNI (AGENTE_SAASA)
+      // Modo DNI (AGENTE_SAASA / LIDER_SAASA)
       if (!forgotDni) {
         showError("Por favor, ingresa tu DNI.");
         return;
@@ -249,7 +249,7 @@ export default function LoginPage() {
         // 1. Solicitar recuperación (el backend intentará enviar el código si hay correo)
         await authApi.forgotPasswordDni({ dni: forgotDni });
 
-        // 2. Consultar si el agente tiene correo para mostrar el mensaje correcto
+        // 2. Consultar si el agente/líder tiene correo para mostrar el mensaje correcto
         const { data: checkData } = await authApi.agentetieneCorreo(forgotDni);
         const tieneCorreo = checkData?.data === true;
 
@@ -551,7 +551,7 @@ export default function LoginPage() {
                     ].join(" ")}
                     onClick={() => switchLoginMode(LOGIN_MODE.DNI)}
                   >
-                    DNI (Agente)
+                    DNI (Agente / Líder)
                   </button>
                 </div>
 
@@ -649,7 +649,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <span className={styles.hint}>
-                        Solo disponible para el rol Agente SAASA
+                        Disponible para Agente SAASA y Líder SAASA
                       </span>
                     </div>
                   )}

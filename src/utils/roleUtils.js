@@ -34,3 +34,13 @@ export function getRolLabel(rol) {
 export function getRolIcon(rol) {
   return ROL_ICONS[rol] ?? "User";
 }
+
+/**
+ * Roles cuyo correo es OPCIONAL y que pueden iniciar sesión con DNI.
+ * Debe coincidir con RolEnum#permiteLoginPorDni del backend.
+ */
+export const ROLES_LOGIN_DNI = ["AGENTE_SAASA", "LIDER_SAASA"];
+
+export function permiteLoginPorDni(rol) {
+  return ROLES_LOGIN_DNI.includes(rol);
+}
