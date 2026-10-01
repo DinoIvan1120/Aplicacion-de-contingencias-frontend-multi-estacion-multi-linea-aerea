@@ -591,7 +591,7 @@ export default function LoginPage() {
                               correo: e.target.value,
                             }))
                           }
-                          placeholder="operaciones@saasa.com"
+                          placeholder="operaciones@gmail.com"
                           className={styles.input}
                         />
                       </div>
@@ -1027,7 +1027,7 @@ export default function LoginPage() {
 
           </div>
 
-          <p className={styles.cardFooter}>Diseño e Innovación - 2026 v1.1</p>
+          <p className={styles.cardFooter}>Desarrollo por Dino Iván - 2026 v1.1</p>
         </div>
       </div>
 
