@@ -792,7 +792,24 @@ function FormularioAtencion({ registro, onVolver }) {
   /* ── Cámara con @zxing/browser (auto-scan PDF417) ── */
   const readerRef = useRef(null); // instancia de BrowserMultiFormatReader
 
-  const detenerCamara = useCallback(() => {
+  /* FIX iPhone — @zxing/browser 0.2.x no tiene reader.reset(): el escaneo
+   * continuo solo se detiene con los "controls" que devuelve
+   * decodeFromStream. Sin esto, en Safari (iOS) el loop sigue leyendo el
+   * último cuadro congelado del video y vuelve a mostrar el modal. */
+  const controlsRef = useRef(null);
+  /* FIX iPhone — una lectura por cada vez que se enciende la cámara. */
+  const lecturaHechaRef = useRef(false);
+  
+   const detenerCamara = useCallback(() => {
+    // FIX iPhone — detener el loop de decodificación de ZXing
+    if (controlsRef.current) {
+      try {
+        controlsRef.current.stop();
+      } catch {
+        /* ignorar */
+      }
+      controlsRef.current = null;
+    }
     // Detener el stream de video
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
@@ -807,11 +824,20 @@ function FormularioAtencion({ registro, onVolver }) {
       }
       readerRef.current = null;
     }
+    // FIX iPhone — liberar el video para que Safari no conserve el último cuadro
+    if (videoRef.current) {
+      try {
+        videoRef.current.srcObject = null;
+      } catch {
+        /* ignorar */
+      }
+    }
     setCamOn(false);
   }, []);
 
   const iniciarCamara = useCallback(async () => {
     scanningRef.current = false; // ← reset al iniciar
+    lecturaHechaRef.current = false; // FIX iPhone — permite una nueva lectura
     try {
       const hints = new Map();
       hints.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -863,13 +889,15 @@ function FormularioAtencion({ registro, onVolver }) {
     }
 
     // Ahora sí: videoRef.current existe en el DOM
-    readerRef.current.decodeFromStream(
+    const lectura = readerRef.current.decodeFromStream(
       streamRef.current,
       videoRef.current,
       async (result) => {
         if (!result) return;
+        if (lecturaHechaRef.current) return; // FIX iPhone — ya se leyó en esta sesión de cámara
         if (scanningRef.current) return; // ← ya está procesando, ignorar
         scanningRef.current = true; // ← bloquear siguientes disparos
+        lecturaHechaRef.current = true; // FIX iPhone
 
         const codigo = result.getText();
         detenerCamara();
@@ -944,6 +972,25 @@ function FormularioAtencion({ registro, onVolver }) {
         }
       },
     );
+
+    // FIX iPhone — guardar los controles para poder detener el loop
+    Promise.resolve(lectura)
+      .then((controls) => {
+        if (!controls) return;
+        if (lecturaHechaRef.current || !streamRef.current) {
+          // La cámara ya se detuvo antes de que llegaran los controles
+          try {
+            controls.stop();
+          } catch {
+            /* ignorar */
+          }
+          return;
+        }
+        controlsRef.current = controls;
+      })
+      .catch(() => {
+        /* el error de cámara ya se maneja al iniciarla */
+      });
   }, [camOn, detenerCamara]);
 
   // Cleanup al desmontar el componente
