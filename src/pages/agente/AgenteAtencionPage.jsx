@@ -850,13 +850,35 @@ function FormularioAtencion({ registro, onVolver }) {
       hints.set(DecodeHintType.TRY_HARDER, true);
 
       const reader = new BrowserMultiFormatReader(hints, {
-        delayBetweenScanAttempts: 300,
+        delayBetweenScanAttempts: 150,
       });
       readerRef.current = reader;
 
+      /* Nitidez: sin width/height el navegador suele abrir 640x480, y un
+       * PDF417 de boarding pass queda con 1-2 px por módulo (ilegible).
+       * Se pide 1920x1080 como ideal; si el equipo no lo soporta, el
+       * navegador usa la mayor resolución disponible. */
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
       });
+
+      /* Nitidez: autoenfoque continuo (cuando el dispositivo lo soporta) */
+      try {
+        const track = stream.getVideoTracks()[0];
+        const caps = track?.getCapabilities?.() ?? {};
+        const advanced = [];
+        if (caps.focusMode?.includes("continuous")) {
+          advanced.push({ focusMode: "continuous" });
+        }
+        if (advanced.length) await track.applyConstraints({ advanced });
+      } catch {
+        /* no bloqueante: algunos navegadores (iOS) no exponen focusMode */
+      }
+
       streamRef.current = stream;
       setCamOn(true);
       // ← decodeFromStream se llama en useEffect([camOn])
