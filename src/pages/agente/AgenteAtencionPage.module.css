@@ -445,9 +445,31 @@
 .pxInput:focus {
   border-color: #16a34a;
 }
+
+/* iOS Safari: el input de fecha usa estilo nativo (ancho mínimo propio,
+ * texto centrado y altura colapsada cuando está vacío). Se normaliza para
+ * que se vea igual que los demás inputs y que Android. */
+.pxInput[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 2.75rem;
+  text-align: left;
+}
+.pxInput[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em; /* evita que quede aplastado cuando está vacío */
+}
+.pxInput[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
 .emisionGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
   gap: 1rem;
 }
 .agregarPxBtn {
@@ -907,7 +929,7 @@
     grid-template-columns: 1fr;
   }
   .emisionGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0,1fr);
   }
   .accionesGrid {
     grid-template-columns: 1fr;
