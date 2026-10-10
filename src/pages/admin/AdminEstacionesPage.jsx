@@ -1,5 +1,5 @@
 import { useState,useRef } from "react";
-import { Building2, Plus, Edit, Power, Plane, X, Camera } from "lucide-react";
+import { Building2, Plus, Edit, Power, Plane, X, Camera,Trash2 } from "lucide-react";
 import {
   useEstaciones,
   useCrearEstacion,
