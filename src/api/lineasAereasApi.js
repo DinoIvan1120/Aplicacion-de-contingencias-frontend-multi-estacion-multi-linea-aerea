@@ -19,6 +19,7 @@ const lineasAereasApi = {
     headers: { "Content-Type": "multipart/form-data" },
   });
  },
+ eliminarLogo: (id) => axiosClient.delete(`${BASE}/${id}/logo`),
 };
 
 export default lineasAereasApi;

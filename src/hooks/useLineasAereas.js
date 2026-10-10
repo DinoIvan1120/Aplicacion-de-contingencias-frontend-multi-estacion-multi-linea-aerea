@@ -36,6 +36,16 @@ export function useSubirLogoLineaAerea() {
   });
 }
 
+export function useEliminarLogoLineaAerea() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => lineasAereasApi.eliminarLogo(id),
+    // Refresca el listado (logoKey pasa a null) y descarta la URL firmada
+    // cacheada del logo de esta línea.
+    onSuccess: () => qc.invalidateQueries({ queryKey: LINEAS_AEREAS_KEY }),
+  });
+}
+
 export function useCrearLineaAerea() {
   const qc = useQueryClient();
   return useMutation({

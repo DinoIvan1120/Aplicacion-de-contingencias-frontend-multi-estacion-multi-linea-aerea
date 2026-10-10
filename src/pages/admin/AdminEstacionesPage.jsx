@@ -15,8 +15,10 @@ import {
   useLineasAereas,
   useCrearLineaAerea,
   useLogoLineaAerea,
-  useSubirLogoLineaAerea
+  useSubirLogoLineaAerea,
+  useEliminarLogoLineaAerea,
 } from "../../hooks/useLineasAereas";
+import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/ui/Button.jsx";
 import Badge from "../../components/ui/Badge.jsx";
 import Modal from "../../components/ui/Modal.jsx";
@@ -446,6 +448,9 @@ function LogoAerolinea({ lineaAerea, showModal }) {
     enabled: tieneLogo,
   });
   const subirLogo = useSubirLogoLineaAerea();
+  const eliminarLogo = useEliminarLogoLineaAerea();
+  const { esAdministradorGlobal } = useAuth();
+  const [confirmarBorrado, setConfirmarBorrado] = useState(false);
   const inputRef = useRef(null);
 
   const handleFileChange = async (e) => {
@@ -459,7 +464,21 @@ function LogoAerolinea({ lineaAerea, showModal }) {
     }
   };
 
+  const handleEliminar = async () => {
+    try {
+      await eliminarLogo.mutateAsync(lineaAerea.id);
+      setConfirmarBorrado(false);
+    } catch (err) {
+      setConfirmarBorrado(false);
+      showModal("error", "Error", err.response?.data?.message ?? "No se pudo eliminar el logo.");
+    }
+  };
+
   const mostrarImagen = tieneLogo && !isLoading && !isError && logoUrl;
+
+  // Solo el Administrador Global puede borrar el logo (el catálogo es
+  // compartido por todas las estaciones). El backend lo valida igualmente.
+  const puedeEliminar = esAdministradorGlobal && tieneLogo;
 
   return (
     <div className={styles.logoWrapper}>
@@ -485,6 +504,29 @@ function LogoAerolinea({ lineaAerea, showModal }) {
         className={styles.hiddenFileInput}
         onChange={handleFileChange}
       />
+      {puedeEliminar && (
+        <>
+          <button
+            type="button"
+            className={styles.logoDeleteBtn}
+            onClick={() => setConfirmarBorrado(true)}
+            disabled={eliminarLogo.isPending || subirLogo.isPending}
+            title="Eliminar logo"
+            aria-label={`Eliminar logo de ${lineaAerea.nombre}`}
+          >
+            <Trash2 size={13} />
+          </button>
+          <ConfirmModal
+            open={confirmarBorrado}
+            onClose={() => setConfirmarBorrado(false)}
+            onConfirm={handleEliminar}
+            loading={eliminarLogo.isPending}
+            title="¿Eliminar logo?"
+            message={`Se eliminará el logo de ${lineaAerea.nombre}. Dejará de mostrarse en el sistema y en los vouchers (PDF), que usarán el encabezado de solo texto. Puedes subir uno nuevo después.`}
+            confirmLabel="Eliminar"
+          />
+        </>
+      )}
     </div>
   );
 }
