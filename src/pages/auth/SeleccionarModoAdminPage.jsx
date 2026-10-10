@@ -24,7 +24,18 @@ import styles from "./SeleccionSharedPage.module.css";
  */
 export default function SeleccionarModoAdminPage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout,seleccionarEstacion } = useAuth();
+  
+  // Los modos globales (catálogo y usuarios) no dependen de ninguna
+  // estación. Si el admin ya había operado en una estación/aerolínea y
+  // volvió a esta pantalla, esa estación seguía activa en el contexto, y
+  // el Sidebar (enModoCatalogoGlobal = global && !estacionActiva) mostraba
+  // el menú operativo completo y la lista de usuarios filtrada. Se limpia
+  // el contexto antes de entrar para que el modo sea realmente global.
+  const irAModoGlobal = (ruta) => {
+    seleccionarEstacion(null, null);
+    navigate(ruta);
+  };
 
   return (
     <div className={styles.page}>
@@ -57,7 +68,7 @@ export default function SeleccionarModoAdminPage() {
             nombre="Gestionar Estaciones y Aerolíneas"
             DefaultIcon={Building2}
             gradient="linear-gradient(135deg, var(--rol-admin, #EA580C), #F97316)"
-            onClick={() => navigate("/admin/estaciones")}
+            onClick={() => irAModoGlobal("/admin/estaciones")}
           />
 
           <OpcionModo
@@ -65,7 +76,7 @@ export default function SeleccionarModoAdminPage() {
             nombre="Gestionar Usuarios"
             DefaultIcon={UserCog}
             gradient="linear-gradient(135deg, #0F766E, #14B8A6)"
-            onClick={() => navigate("/admin/usuarios")}
+            onClick={() => irAModoGlobal("/admin/usuarios")}
           />
 
           <OpcionModo
