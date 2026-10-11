@@ -47,6 +47,7 @@ import {
   useGenerarYEnviarVoucherGrupal,
   useObtenerUrlDescarga, // ← AGREGAR ESTA LÍNEA
 } from "../../hooks/useAtenciones";
+import { useAuth } from "../../context/AuthContext";
 import InfoModal from "../../components/ui/InfoModal.jsx";
 import Badge from "../../components/ui/Badge.jsx";
 import Spinner from "../../components/ui/Spinner.jsx";
@@ -589,7 +590,16 @@ function FormularioAtencion({ registro, onVolver }) {
 
   /* ── Datos de emisión ── */
   const [fechaEmision, setFechaEmision] = useState(HOY);
-  const [lugarEmision, setLugarEmision] = useState("LIM");
+  const { estacionActiva } = useAuth();
+  // const [lugarEmision, setLugarEmision] = useState("LIM");
+  const [lugarEmision, setLugarEmision] = useState(
+    estacionActiva?.codigoIata ?? ""
+  );
+
+  // Si cambia la estación activa (selector del topbar), actualizar el lugar de emisión.
+  useEffect(() => {
+    setLugarEmision(estacionActiva?.codigoIata ?? "");
+  }, [estacionActiva?.codigoIata]);
 
   /* ── Computed service state (Caso 3 = per-passenger, otros = global) ── */
   const isSvInd = modoEnvio === "servicios_independientes";
@@ -2627,7 +2637,8 @@ function FormularioAtencion({ registro, onVolver }) {
                 className={styles.pxInput}
                 value={lugarEmision}
                 onChange={(e) => setLugarEmision(e.target.value.toUpperCase())}
-                placeholder="LIM"
+                placeholder={estacionActiva?.codigoIata ?? "LIM"}
+                disabled
               />
             </div>
           </div>
