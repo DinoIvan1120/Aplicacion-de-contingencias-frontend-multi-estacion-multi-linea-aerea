@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { DecodeHintType, BarcodeFormat } from "@zxing/library";
 import { useAgenteAtencion } from "../../context/AgenteAtencionContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useSearchParams } from "react-router-dom";
 import {
   Users,
   Plane,
@@ -3499,6 +3499,33 @@ export default function AgenteAtencionPage() {
   const { data: registros = [], isLoading } = useRegistrosHoy();
   const [registroSel, setRegistroSel] = useState(null);
   const { setVueloSeleccionado } = useAgenteAtencion();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const registroIdParam = searchParams.get("registro");
+
+  // Solo se permite restaurar el vuelo desde la URL una vez por montaje
+  // (al volver desde el detalle). Se desactiva si el agente elige/sale a mano.
+  const puedeRestaurarRef = useRef(true);
+
+  useEffect(() => {
+    if (!puedeRestaurarRef.current || registroSel || !registroIdParam) return;
+    const r = registros.find((x) => String(x.id) === registroIdParam);
+    if (r) {
+      puedeRestaurarRef.current = false;
+      setRegistroSel(r);
+    }
+  }, [registroIdParam, registros, registroSel]);
+
+  const seleccionarRegistro = (r) => {
+    puedeRestaurarRef.current = false;
+    setRegistroSel(r);
+    setSearchParams({ registro: String(r.id) }, { replace: true });
+  };
+
+  const volverALista = () => {
+    puedeRestaurarRef.current = false;
+    setRegistroSel(null);
+    setSearchParams({}, { replace: true });
+  };
 
   // Avisa al Sidebar si ya se seleccionó un vuelo (para mostrar/ocultar
   // el ítem "Carga masiva (Excel)"). Se limpia al desmontar la página.
@@ -3508,15 +3535,12 @@ export default function AgenteAtencionPage() {
   }, [registroSel, setVueloSeleccionado]);
 
   return registroSel ? (
-    <FormularioAtencion
-      registro={registroSel}
-      onVolver={() => setRegistroSel(null)}
-    />
+    <FormularioAtencion registro={registroSel} onVolver={volverALista} />
   ) : (
     <SeleccionVuelo
       registros={registros}
       loading={isLoading}
-      onSeleccionar={setRegistroSel}
+      onSeleccionar={seleccionarRegistro}
     />
   );
 }
