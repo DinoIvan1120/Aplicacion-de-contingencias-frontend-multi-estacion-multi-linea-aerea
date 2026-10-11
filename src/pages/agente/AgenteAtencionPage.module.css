@@ -446,6 +446,12 @@
   border-color: #16a34a;
 }
 
+.pxInput:disabled {
+  background: var(--bg);
+  color: var(--text-500);
+  cursor: not-allowed;
+}
+
 /* iOS Safari: el input de fecha usa estilo nativo (ancho mínimo propio,
  * texto centrado y altura colapsada cuando está vacío). Se normaliza para
  * que se vea igual que los demás inputs y que Android. */
