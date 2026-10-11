@@ -69,6 +69,12 @@ const EMPTY_FILTROS = {
   estado: "",
 };
 
+// Fecha de hoy en zona Lima (YYYY-MM-DD). Se usa para bloquear fechas pasadas.
+const getHoyLima = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" }).format(
+    new Date()
+  );
+
 const contarActivos = (f) => Object.values(f).filter((v) => v !== "").length;
 
 export default function AdminVuelosPage() {
@@ -162,10 +168,11 @@ export default function AdminVuelosPage() {
   const abrirCrear = () => {
   setEditId(null);
   setOriginalFechaVuelo("");
-  // El campo "Aerolínea" se pre-llena desde el contexto activo: el backend
-  // ahora valida que coincida exactamente con la línea del contexto
-  // (validarAerolineaCoincideConContexto), así que evita rechazos por typo.
-  setForm({ ...EMPTY_FORM, aerolinea: lineaAereaActiva?.lineaAereaNombre ?? "" });
+  // Aerolínea y Origen se pre-llenan desde el contexto activo
+  // (estación = aeropuerto desde donde se opera; el backend valida la aerolínea).
+  setForm({ ...EMPTY_FORM, aerolinea: lineaAereaActiva?.lineaAereaNombre ?? "",
+    origen: estacionActiva?.codigoIata ?? "",
+   });
   setErrors({});
   setFormOpen(true);
 };
@@ -206,9 +213,10 @@ export default function AdminVuelosPage() {
     else if (!/^[A-Za-z]{3}$/.test(form.destino.trim()))
       err.destino = "Código IATA: 3 letras";
     if (!form.fechaVuelo) err.fechaVuelo = "La fecha es requerida";
-    const hoy = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Lima",
-    }).format(new Date());
+    // const hoy = new Intl.DateTimeFormat("en-CA", {
+    //   timeZone: "America/Lima",
+    // }).format(new Date());
+    const hoy = getHoyLima();
     if (!editId && form.fechaVuelo && form.fechaVuelo < hoy) {
       // CREAR: nunca fechas pasadas
       err.fechaVuelo = "No puedes registrar un vuelo con fecha anterior a hoy";
@@ -694,6 +702,7 @@ export default function AdminVuelosPage() {
               onChange={handleFormChange}
               error={errors.origen}
               placeholder="Ej: MAD"
+              disabled={!editId}
               required
             />
             <Input
@@ -715,6 +724,7 @@ export default function AdminVuelosPage() {
               value={form.fechaVuelo}
               onChange={handleFormChange}
               error={errors.fechaVuelo}
+              min={getHoyLima()}
               required
             />
             <Select
