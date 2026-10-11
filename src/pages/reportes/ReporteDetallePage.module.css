@@ -787,7 +787,16 @@
   }
   .generadoPor,
   .actualizadoPor {
+    display: block;
     width: 100%;
+    box-sizing: border-box;
+    line-height: 1.5;
+    padding: 0.5rem 0.875rem;
+  }
+  .generadoPor .rolTag,
+  .actualizadoPor .rolTag {
+    margin-left: 0.25rem;
+    white-space: nowrap;
   }
   .infoGrid {
     grid-template-columns: 1fr 1fr;
