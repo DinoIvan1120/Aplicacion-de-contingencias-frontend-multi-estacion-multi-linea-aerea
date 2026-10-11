@@ -805,6 +805,29 @@
   color: var(--text-500);
 }
 
+.verDetalleBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-900);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+.verDetalleBtn:hover:not(:disabled) {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+.verDetalleBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Cards de vuelo (lista inicial) */
 .vuelosGrid {
   display: grid;

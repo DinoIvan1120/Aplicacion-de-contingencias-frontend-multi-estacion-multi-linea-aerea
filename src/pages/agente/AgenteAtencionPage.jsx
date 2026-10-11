@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { DecodeHintType, BarcodeFormat } from "@zxing/library";
 import { useAgenteAtencion } from "../../context/AgenteAtencionContext.jsx";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   Plane,
@@ -27,6 +28,7 @@ import {
   CheckCircle2,
   Mail,
   Trash2,
+  ExternalLink,
 } from "lucide-react";
 import PhoneInput from "../../components/ui/PhoneInput.jsx"; // ← NUEVO — input con prefijo +51 fijo
 import { useRegistrosHoy } from "../../hooks/useRegistrosDiarios";
@@ -798,6 +800,7 @@ function FormularioAtencion({ registro, onVolver }) {
   const genYEnviarGrupal = useGenerarYEnviarVoucherGrupal();
   const obtenerUrl = useObtenerUrlDescarga(); // ← AGREGAR ESTA LÍNEA
   const { data: atencionesPrev = [] } = useAtencionesRegistro(registro.id);
+  const navigate = useNavigate();
 
   /* ── Cámara con @zxing/browser (auto-scan PDF417) ── */
   const readerRef = useRef(null); // instancia de BrowserMultiFormatReader
@@ -3124,6 +3127,19 @@ function FormularioAtencion({ registro, onVolver }) {
                   label={a.estado ?? "ATENDIDO"}
                   variant={a.estado === "ANULADO" ? "danger" : "success"}
                 />
+                <button
+                  type="button"
+                  className={styles.verDetalleBtn}
+                  onClick={() => navigate(`/reportes/detalle/${a.numeroCorrelativo}`)}
+                  disabled={a.estado === "ANULADO" || !a.numeroCorrelativo}
+                  title={
+                    a.estado === "ANULADO"
+                      ? "Registro anulado: no se puede editar"
+                      : "Ver / editar detalle de este pasajero"
+                  }
+                >
+                  <ExternalLink size={14} /> Ver detalle
+                </button>
               </div>
             ))}
           </div>
