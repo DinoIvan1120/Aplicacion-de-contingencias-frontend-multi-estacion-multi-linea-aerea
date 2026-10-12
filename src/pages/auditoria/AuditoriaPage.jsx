@@ -15,6 +15,7 @@ import {
 import { useUsuarios } from "../../hooks/useUsuarios";
 import { useAuth } from "../../context/AuthContext";
 import { formatearFecha } from "../../utils/formatters";
+import DetalleAuditoria from "./DetalleAuditoria";
 import styles from "./AuditoriaPage.module.css";
 
 /* ── Constantes de filtros ── */
@@ -26,18 +27,18 @@ const MODULOS = [
   "REPORTES",
   "SERVICIOS",
 ];
+// Acciones que el backend realmente registra hoy en la tabla auditoria.
 const ACCIONES = [
   "CREAR_ATENCION",
-  "ACTUALIZAR_ATENCION",
   "ANULAR_ATENCION",
-  "CREAR_USUARIO",
-  "ACTUALIZAR_USUARIO",
-  "ELIMINAR_USUARIO",
-  "CREAR_PROVEEDOR",
-  "ACTUALIZAR_PROVEEDOR",
-  "ELIMINAR_PROVEEDOR",
-  "ASIGNAR_SERVICIOS",
+  "RESTAURAR_ATENCION",
+  "ACTUALIZAR_PASAJERO",
+  "ACTUALIZAR_SERVICIOS",
   "REGENERAR_PDF",
+  "REGENERAR_PDF_GRUPAL",
+  "REENVIAR_PDF",
+  "REENVIAR_PDF_GRUPAL",
+  "REENVIAR_WHATSAPP",
 ];
 
 const EMPTY = {
@@ -375,12 +376,13 @@ export default function AuditoriaPage() {
                     )}
                   </td>
                   <td className={styles.tdDetalle}>
-                    <span className={styles.detalleTxt}>
-                      {r.detalle ?? r.detail ?? "—"}
-                    </span>
+                    <DetalleAuditoria detalle={r.detalle ?? r.detail} />
                   </td>
                   <td className={styles.td}>
-                    <span className={styles.ip}>
+                    <span
+                      className={styles.ip}
+                      title="IP desde la que se hizo la acción"
+                    >
                       {r.ipOrigen ?? r.ip ?? "—"}
                     </span>
                   </td>
