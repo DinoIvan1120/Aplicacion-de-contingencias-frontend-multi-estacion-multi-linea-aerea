@@ -32,7 +32,10 @@ export function useExportarExcelAuditoria() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `auditoria-${new Date().toISOString().split("T")[0]}.xlsx`;
+      const hoyLima = new Date().toLocaleDateString("en-CA", {
+        timeZone: "America/Lima",
+      });
+      a.download = `auditoria-${hoyLima}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
     },
