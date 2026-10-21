@@ -1478,9 +1478,8 @@ export default function ReporteDetallePage() {
               </button>
             )}
 
-            {/* NUEVO — Voucher en ticket (impresora térmica 80/104 mm).
-                Funciona también desde un acompañante: el backend devuelve
-                el ticket grupal completo. */}
+             {/* Voucher en ticket (impresora térmica). Al tocarlo se elige el
+                rollo 80/104 mm. Desde un acompañante imprime el ticket grupal. */}
             <BotonImprimirTicket
               atencionId={d.atencionId}
               bloqueEnMovil
@@ -1488,7 +1487,7 @@ export default function ReporteDetallePage() {
               onError={(msg) =>
                 showModal("error", "No se pudo imprimir el ticket", msg)
               }
-            />
+            />  
 
             {d.puedeEditarServicios ? (
               <button

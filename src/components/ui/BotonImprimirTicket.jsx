@@ -1,36 +1,36 @@
-import { useState } from "react";
-import { Printer } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { Printer, Check, X } from "lucide-react";
 import atencionesApi from "../../api/atencionesApi";
 import Spinner from "./Spinner.jsx";
 import styles from "./BotonImprimirTicket.module.css";
 
 /**
- * NUEVO — Botón "Imprimir ticket" (voucher en formato rollo térmico).
+ * Botón "Imprimir ticket" (voucher en formato rollo térmico).
  *
- * Llama a GET /atenciones/{id}/voucher/ticket?ancho=80|104 y abre el PDF en
- * una pestaña nueva, desde donde el agente lo imprime (o lo comparte a la
- * app de la impresora). Si la atención pertenece a un grupo, el backend
- * devuelve automáticamente el ticket GRUPAL.
- *
- * El ancho del rollo elegido se recuerda en el navegador (localStorage), así
- * el agente lo configura una sola vez por dispositivo.
+ * Al tocarlo se abre un panel para elegir el ancho del rollo (80 / 104 mm).
+ * La última opción usada queda marcada y se recuerda en el navegador.
+ * Si la atención pertenece a un grupo, el backend devuelve el ticket GRUPAL.
  *
  * Props:
- *  - atencionId        id de la atención (obligatorio)
- *  - disabled          deshabilita el botón (por ejemplo, atención anulada)
- *  - mostrarSelector   muestra el selector de ancho 80/104 mm (default: true)
- *  - compacto          versión pequeña para filas de listas (default: false)
- *  - bloqueEnMovil     en pantallas angostas ocupa todo el ancho (default: false)
- *  - onError(mensaje)  callback para mostrar el error con el modal de la página
+ *  - atencionId     id de la atención (obligatorio)
+ *  - disabled       deshabilita el botón (por ejemplo, atención anulada)
+ *  - compacto       versión pequeña para filas de listas (default: false)
+ *  - bloqueEnMovil  en pantallas angostas ocupa todo el ancho (default: false)
+ *  - onError(msg)   callback para mostrar el error con el modal de la página
  */
 
 const CLAVE_ANCHO = "saasa.ticket.ancho";
-const ANCHOS = [80, 104];
+
+const OPCIONES = [
+  { ancho: 80, titulo: "Rollo 80 mm", detalle: "Impresora de mostrador" },
+  { ancho: 104, titulo: "Rollo 104 mm", detalle: "Impresora portátil (Zebra ZQ521)" },
+];
 
 function leerAnchoGuardado() {
   try {
     const v = Number(window.localStorage.getItem(CLAVE_ANCHO));
-    return ANCHOS.includes(v) ? v : 80;
+    return OPCIONES.some((o) => o.ancho === v) ? v : 80;
   } catch {
     return 80;
   }
@@ -61,25 +61,30 @@ async function mensajeDeError(err) {
 export default function BotonImprimirTicket({
   atencionId,
   disabled = false,
-  mostrarSelector = true,
   compacto = false,
   bloqueEnMovil = false,
   onError,
 }) {
-  const [ancho, setAncho] = useState(leerAnchoGuardado);
+  const [panelAbierto, setPanelAbierto] = useState(false);
+  const [ultimoAncho, setUltimoAncho] = useState(leerAnchoGuardado);
   const [cargando, setCargando] = useState(false);
 
-  const cambiarAncho = (e) => {
-    const nuevo = Number(e.target.value);
-    setAncho(nuevo);
-    guardarAncho(nuevo);
-  };
+  // Cerrar el panel con la tecla Escape
+  useEffect(() => {
+    if (!panelAbierto) return;
+    const onKey = (e) => e.key === "Escape" && setPanelAbierto(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [panelAbierto]);
 
-  const handleImprimir = async () => {
+  const imprimir = async (ancho) => {
     if (!atencionId || cargando) return;
+    setPanelAbierto(false);
+    setUltimoAncho(ancho);
+    guardarAncho(ancho);
 
-    // La pestaña se abre ANTES de la petición, dentro del clic: si se abre
-    // después del await, Safari/Chrome móvil la bloquean como popup.
+    // La pestaña se abre dentro del clic (antes del await): si se abre
+    // después, Safari/Chrome móvil la bloquean como popup.
     const pestana = window.open("", "_blank");
     if (pestana) {
       pestana.document.title = "Generando ticket...";
@@ -124,32 +129,85 @@ export default function BotonImprimirTicket({
 
   return (
     <div className={clasesWrap}>
-      {mostrarSelector && (
-        <select
-          className={styles.selector}
-          value={ancho}
-          onChange={cambiarAncho}
-          disabled={disabled || cargando}
-          aria-label="Ancho del rollo de la impresora"
-          title="Ancho del rollo de la impresora"
-        >
-          {ANCHOS.map((a) => (
-            <option key={a} value={a}>
-              {a} mm
-            </option>
-          ))}
-        </select>
-      )}
       <button
         type="button"
         className={styles.btn}
-        onClick={handleImprimir}
+        onClick={() => setPanelAbierto(true)}
         disabled={disabled || cargando || !atencionId}
-        title={`Imprimir voucher en ticket de ${ancho} mm`}
+        title="Imprimir voucher en ticket"
       >
         {cargando ? <Spinner size="sm" /> : <Printer size={compacto ? 14 : 15} />}
         {cargando ? "Generando..." : compacto ? "Ticket" : "Imprimir ticket"}
       </button>
+
+      {/* El panel se monta en <body> para que no herede estilos de la página
+          (por ejemplo, ".acciones button { width: 100% }" en móvil). */}
+      {panelAbierto &&
+        createPortal(
+          <div
+            className={styles.overlay}
+            onClick={() => setPanelAbierto(false)}
+            role="presentation"
+          >
+            <div
+              className={styles.panel}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ticket-panel-titulo"
+            >
+              <div className={styles.panelHeader}>
+                <h3 id="ticket-panel-titulo" className={styles.panelTitulo}>
+                  <Printer size={17} /> Imprimir ticket
+                </h3>
+                <button
+                  type="button"
+                  className={styles.panelCerrar}
+                  onClick={() => setPanelAbierto(false)}
+                  aria-label="Cerrar"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p className={styles.panelDesc}>
+                Elige el ancho del rollo de la impresora.
+              </p>
+
+              <div className={styles.opciones}>
+                {OPCIONES.map((o) => {
+                  const activo = o.ancho === ultimoAncho;
+                  return (
+                    <button
+                      key={o.ancho}
+                      type="button"
+                      className={`${styles.opcion} ${activo ? styles.opcionActiva : ""}`}
+                      onClick={() => imprimir(o.ancho)}
+                      autoFocus={activo}
+                    >
+                      <span className={styles.opcionTexto}>
+                        <span className={styles.opcionTitulo}>{o.titulo}</span>
+                        <span className={styles.opcionDetalle}>
+                          {activo ? "Último usado · " : ""}
+                          {o.detalle}
+                        </span>
+                      </span>
+                      {activo && <Check size={18} className={styles.opcionCheck} />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                className={styles.panelCancelar}
+                onClick={() => setPanelAbierto(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

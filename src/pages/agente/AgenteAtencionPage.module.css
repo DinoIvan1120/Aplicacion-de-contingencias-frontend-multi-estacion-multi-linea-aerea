@@ -805,6 +805,18 @@
   color: var(--text-500);
 }
 
+/* Nombre y botones de cada fila de "Pasajeros ya atendidos" */
+.atencionNombre {
+  min-width: 0;
+}
+
+.atencionAcciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .verDetalleBtn {
   margin-left: auto;
   display: inline-flex;
@@ -945,6 +957,23 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+   /* Fila ordenada: nombre / PNR + estado / botones */
+  .atencionNombre {
+    flex-basis: 100%;
+  }
+  .atencionAcciones {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .atencionAcciones > * {
+    flex: 1;
+  }
+  .atencionAcciones .verDetalleBtn {
+    justify-content: center;
+    margin-left: 0;
+    min-height: 36px;
+  }
+  
   .vuelosGrid {
     grid-template-columns: 1fr;
   }

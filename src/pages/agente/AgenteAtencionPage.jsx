@@ -3118,7 +3118,7 @@ function FormularioAtencion({ registro, onVolver }) {
           <div className={styles.atencionesLista}>
             {atencionesPrev.map((a) => (
               <div key={a.id} className={styles.atencionItem}>
-                <span>
+                <span className={styles.atencionNombre}>
                   <strong>
                     {a.apellido}, {a.nombre}
                   </strong>
@@ -3128,31 +3128,34 @@ function FormularioAtencion({ registro, onVolver }) {
                   label={a.estado ?? "ATENDIDO"}
                   variant={a.estado === "ANULADO" ? "danger" : "success"}
                 />
-                <button
-                  type="button"
-                  className={styles.verDetalleBtn}
-                  onClick={() => navigate(`/reportes/detalle/${a.numeroCorrelativo}`)}
-                  disabled={a.estado === "ANULADO" || !a.numeroCorrelativo}
-                  title={
-                    a.estado === "ANULADO"
-                      ? "Registro anulado: no se puede editar"
-                      : "Ver / editar detalle de este pasajero"
-                  }
-                >
-                  <ExternalLink size={14} /> Ver detalle
-                </button>
-                {/* NUEVO — Voucher en ticket para impresora térmica. Si el
-                    pasajero es de un grupo, el backend imprime el ticket grupal.
-                    Usa el ancho de rollo guardado (se elige en el detalle). */}
-                <BotonImprimirTicket
-                  atencionId={a.id}
-                  compacto
-                  mostrarSelector={false}
-                  disabled={a.estado === "ANULADO"}
-                  onError={(msg) =>
-                    showModal("error", "No se pudo imprimir el ticket", msg)
-                  }
-                />
+                <div className={styles.atencionAcciones}>
+                  <button
+                    type="button"
+                    className={styles.verDetalleBtn}
+                    onClick={() =>
+                      navigate(`/reportes/detalle/${a.numeroCorrelativo}`)
+                    }
+                    disabled={a.estado === "ANULADO" || !a.numeroCorrelativo}
+                    title={
+                      a.estado === "ANULADO"
+                        ? "Registro anulado: no se puede editar"
+                        : "Ver / editar detalle de este pasajero"
+                    }
+                  >
+                    <ExternalLink size={14} /> Ver detalle
+                  </button>
+                  {/* Voucher en ticket para impresora térmica. Si el pasajero
+                      es de un grupo, el backend imprime el ticket grupal. */}
+                  <BotonImprimirTicket
+                    atencionId={a.id}
+                    compacto
+                    bloqueEnMovil
+                    disabled={a.estado === "ANULADO"}
+                    onError={(msg) =>
+                      showModal("error", "No se pudo imprimir el ticket", msg)
+                    }
+                  />
+                </div>
               </div>
             ))}
           </div>
