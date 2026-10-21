@@ -34,6 +34,7 @@ import Badge from "../../components/ui/Badge.jsx";
 import { getRolLabel } from "../../utils/roleUtils";
 import InfoModal from "../../components/ui/InfoModal.jsx";
 import Spinner from "../../components/ui/Spinner.jsx";
+import BotonImprimirTicket from "../../components/ui/BotonImprimirTicket.jsx"; // ← NUEVO — voucher tipo ticket
 import styles from "./ReporteDetallePage.module.css";
 
 const fmt = (v) => formatearMonto(v ?? 0);
@@ -1476,6 +1477,18 @@ export default function ReporteDetallePage() {
                 <Download size={15} /> Descargar PDF desde titular
               </button>
             )}
+
+            {/* NUEVO — Voucher en ticket (impresora térmica 80/104 mm).
+                Funciona también desde un acompañante: el backend devuelve
+                el ticket grupal completo. */}
+            <BotonImprimirTicket
+              atencionId={d.atencionId}
+              bloqueEnMovil
+              disabled={d.estado === "ANULADO"}
+              onError={(msg) =>
+                showModal("error", "No se pudo imprimir el ticket", msg)
+              }
+            />
 
             {d.puedeEditarServicios ? (
               <button

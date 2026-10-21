@@ -95,6 +95,23 @@ const atencionesApi = {
 
   // Agregar al final del objeto atencionesApi, antes del cierre };
 
+  /**
+   * NUEVO — Voucher tipo ticket para impresora térmica de rollo.
+   * GET /atenciones/{id}/voucher/ticket?ancho=80|104
+   * Si la atención pertenece a un grupo (grupoId con 2+ pasajeros), el
+   * backend devuelve automáticamente el ticket GRUPAL; con el id de
+   * cualquier integrante del grupo se obtiene el mismo ticket.
+   * No sube nada a S3 ni envía correo/WhatsApp.
+   * @param {number} id
+   * @param {80|104} [ancho=80] ancho del rollo en mm
+   * @returns {Promise} respuesta axios con el PDF en response.data (Blob)
+   */
+  descargarVoucherTicket: (id, ancho = 80) =>
+    axiosClient.get(`${BASE}/${id}/voucher/ticket`, {
+      params: { ancho },
+      responseType: "blob",
+    }),
+
   /** GET /registros-diarios/{id}/atenciones */
   getAtenciones: (registroId) =>
     axiosClient.get(`/api/v1/registros-diarios/${registroId}/atenciones`),

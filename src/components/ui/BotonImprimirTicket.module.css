@@ -1,0 +1,96 @@
+/* NUEVO — Botón "Imprimir ticket" (voucher para impresora térmica de rollo) */
+
+.wrap {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  max-width: 100%;
+}
+
+.selector {
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-700);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+.selector:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+.selector:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.5rem;
+  background: #334155; /* gris pizarra: distinto a los botones de PDF/envío */
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn:hover:not(:disabled) {
+  background: #1e293b;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Versión compacta (filas de "Pasajeros ya atendidos") ── */
+.compacto .btn {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-900);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+.compacto .btn:hover:not(:disabled) {
+  background: var(--bg-card);
+  border-color: #334155;
+  color: #334155;
+}
+.compacto .selector {
+  font-size: 0.78rem;
+}
+
+/* ── Pantallas angostas ── */
+@media (max-width: 768px) {
+  .bloqueEnMovil {
+    display: flex;
+    width: 100%;
+  }
+  .bloqueEnMovil .btn {
+    flex: 1;
+  }
+  .bloqueEnMovil .selector {
+    flex: 0 0 auto;
+    min-width: 5.5rem;
+  }
+}
+
+/* En celular el botón táctil no baja de 40 px de alto */
+@media (max-width: 520px) {
+  .btn {
+    min-height: 40px;
+  }
+  .compacto .btn {
+    min-height: 34px;
+  }
+}

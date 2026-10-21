@@ -53,6 +53,7 @@ import { useAuth } from "../../context/AuthContext";
 import InfoModal from "../../components/ui/InfoModal.jsx";
 import Badge from "../../components/ui/Badge.jsx";
 import Spinner from "../../components/ui/Spinner.jsx";
+import BotonImprimirTicket from "../../components/ui/BotonImprimirTicket.jsx"; // ← NUEVO — voucher tipo ticket
 import styles from "./AgenteAtencionPage.module.css";
 
 const BADGE_MAP = {
@@ -3140,6 +3141,18 @@ function FormularioAtencion({ registro, onVolver }) {
                 >
                   <ExternalLink size={14} /> Ver detalle
                 </button>
+                {/* NUEVO — Voucher en ticket para impresora térmica. Si el
+                    pasajero es de un grupo, el backend imprime el ticket grupal.
+                    Usa el ancho de rollo guardado (se elige en el detalle). */}
+                <BotonImprimirTicket
+                  atencionId={a.id}
+                  compacto
+                  mostrarSelector={false}
+                  disabled={a.estado === "ANULADO"}
+                  onError={(msg) =>
+                    showModal("error", "No se pudo imprimir el ticket", msg)
+                  }
+                />
               </div>
             ))}
           </div>
