@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
         <div>
           <h1 className={styles.title}>Panel de Administración</h1>
           <p className={styles.sub}>
-            AirportHub SAASA — Sistema de Gestión de Contingencias
+            SGCA — Sistema de Gestión de Contingencias
           </p>
         </div>
       </div>
