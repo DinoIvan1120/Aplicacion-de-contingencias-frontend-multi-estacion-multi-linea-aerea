@@ -717,8 +717,43 @@ function FormularioAtencion({ registro, onVolver }) {
     title: "",
     message: "",
   });
-  const showModal = (type, title, msg) =>
+    /* ── NUEVO: tickets que se ofrecen para imprimir (opcional) en el modal
+   * de éxito, después de registrar y enviar el voucher por correo/WhatsApp.
+   * Cada item: { id, etiqueta }. En voucher grupal es UN solo item (el
+   * backend devuelve el ticket GRUPAL con el id de cualquier integrante). */
+  const [ticketsPostEnvio, setTicketsPostEnvio] = useState([]);
+  const [errorTicketPostEnvio, setErrorTicketPostEnvio] = useState("");
+
+  const showModal = (type, title, msg) => {
+    setTicketsPostEnvio([]);
+    setErrorTicketPostEnvio("");
     setModal({ open: true, type, title, message: msg });
+  };
+
+  /** Ofrece en el modal de éxito la opción de imprimir el/los ticket(s). */
+  const ofrecerTickets = (atencionIds, esGrupal) => {
+    if (!atencionIds?.length) return;
+    setErrorTicketPostEnvio("");
+    setTicketsPostEnvio(
+      esGrupal
+        ? [
+            {
+              id: atencionIds[0].id,
+              etiqueta: `Ticket grupal (${atencionIds.length} pasajeros)`,
+            },
+          ]
+        : atencionIds.map(({ id, nombre }) => ({
+            id,
+            etiqueta: nombre || `Atención ${id}`,
+          })),
+    );
+  };
+
+  const cerrarModalInfo = () => {
+    setModal((m) => ({ ...m, open: false }));
+    setTicketsPostEnvio([]);
+    setErrorTicketPostEnvio("");
+  };
 
   /* ── Sincronizar disponibilidad manualmente ── */
   const handleSync = async () => {
@@ -1478,7 +1513,12 @@ function FormularioAtencion({ registro, onVolver }) {
           await refetchDisp();
         }
       }
-      if (atId) atencionIds.push({ id: atId, correo: correoFinal });
+      if (atId)
+        atencionIds.push({
+          id: atId,
+          correo: correoFinal,
+          nombre: `${px.apellido.toUpperCase()}, ${px.nombre.toUpperCase()}`, // ← NUEVO: para el ticket opcional
+        });
     }
     return { atencionIds, total: validosConIdx.length, grupoId };
   };
@@ -1671,6 +1711,11 @@ function FormularioAtencion({ registro, onVolver }) {
         "PDF Generado",
         `${total} pasajero${total !== 1 ? "s" : ""} registrado${total !== 1 ? "s" : ""}. El PDF se generó correctamente.`,
       );
+      // NUEVO — opción de imprimir el ticket desde el mismo modal
+      ofrecerTickets(
+        atencionIds,
+        Boolean(datosCompartidosGrupo && grupoId && atencionIds.length > 1),
+      );
       resetForm();
     } catch (err) {
       showModal(
@@ -1737,6 +1782,8 @@ function FormularioAtencion({ registro, onVolver }) {
           "PDF Enviado",
           `${total} pasajero${total !== 1 ? "s" : ""} registrado${total !== 1 ? "s" : ""}. El voucher fue enviado a ${correo}${ccDestinos.length ? ` (con copia a ${ccDestinos.length} correo${ccDestinos.length !== 1 ? "s" : ""} adicional${ccDestinos.length !== 1 ? "es" : ""})` : ""}.`,
         );
+        // NUEVO — opción de imprimir el ticket desde el mismo modal
+        ofrecerTickets(atencionIds, Boolean(grupoId && atencionIds.length > 1));
       } else {
         // ── Caso 2 / Caso 3: correo individual por pasajero ──
         for (const { id, correo: correoPx } of atencionIds) {
@@ -1753,6 +1800,8 @@ function FormularioAtencion({ registro, onVolver }) {
           "Vouchers enviados",
           `${total} pasajero${total !== 1 ? "s" : ""} registrado${total !== 1 ? "s" : ""}. Cada PDF fue enviado al correo individual${ccDestinos.length ? `, con copia a ${ccDestinos.length} correo${ccDestinos.length !== 1 ? "s" : ""} adicional${ccDestinos.length !== 1 ? "es" : ""}` : ""}.`,
         );
+         // NUEVO — opción de imprimir cada ticket desde el mismo modal
+        ofrecerTickets(atencionIds, false);
       }
       await refetchDisp();
       resetForm();
@@ -3167,8 +3216,76 @@ function FormularioAtencion({ registro, onVolver }) {
         type={modal.type}
         title={modal.title}
         message={modal.message}
-        onClose={() => setModal((m) => ({ ...m, open: false }))}
-      />
+        onClose={cerrarModalInfo}
+      >
+        {/* NUEVO — imprimir ticket (opcional) tras registrar/enviar el voucher.
+            Mismo botón que en Reporte detalle: elige rollo 80/104 mm y, en
+            celular, abre "Compartir" para imprimir con mPrint. */}
+        {modal.type === "success" && ticketsPostEnvio.length > 0 && (
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.6rem",
+              paddingTop: "0.75rem",
+              borderTop: "1px solid var(--border, #E5E7EB)",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "var(--text-700, #374151)",
+              }}
+            >
+              ¿Imprimir ticket? (opcional)
+            </p>
+            {ticketsPostEnvio.map((t) => (
+              <div
+                key={t.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    ticketsPostEnvio.length > 1 ? "space-between" : "center",
+                  gap: "0.6rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                {ticketsPostEnvio.length > 1 && (
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--text-700, #374151)",
+                      textAlign: "left",
+                      flex: "1 1 140px",
+                    }}
+                  >
+                    {t.etiqueta}
+                  </span>
+                )}
+                <BotonImprimirTicket
+                  atencionId={t.id}
+                  compacto={ticketsPostEnvio.length > 1}
+                  onError={(msg) => setErrorTicketPostEnvio(msg)}
+                />
+              </div>
+            ))}
+            {ticketsPostEnvio.length === 1 && (
+              <span style={{ fontSize: "0.75rem", color: "var(--text-500, #6B7280)" }}>
+                {ticketsPostEnvio[0].etiqueta}
+              </span>
+            )}
+            {errorTicketPostEnvio && (
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#DC2626" }}>
+                No se pudo imprimir el ticket: {errorTicketPostEnvio}
+              </p>
+            )}
+          </div>
+        )}
+      </InfoModal>
 
       {/* ─── Modal: agregar/editar varios pasajeros de una vez ─── */}
       {pxModalOpen && (

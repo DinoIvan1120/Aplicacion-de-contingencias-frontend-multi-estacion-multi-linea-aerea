@@ -10,7 +10,7 @@ const CONFIG = {
   info:    { Icon: Info,        color: '#1D4ED8', bg: '#DBEAFE' },
 }
 
-export default function InfoModal({ open, onClose, type = 'info', title, message, actionLabel = 'Aceptar' }) {
+export default function InfoModal({ open, onClose, type = 'info', title, message, actionLabel = 'Aceptar', children }) {
   const { Icon, color, bg } = CONFIG[type] ?? CONFIG.info
   return (
     <Modal open={open} onClose={onClose} size="sm">
@@ -20,6 +20,8 @@ export default function InfoModal({ open, onClose, type = 'info', title, message
         </div>
         {title && <h3 className={styles.title}>{title}</h3>}
         {message && <p className={styles.message}>{message}</p>}
+        {/* Contenido extra opcional (por ejemplo, botón Imprimir ticket) */}
+        {children}
         <Button onClick={onClose}>{actionLabel}</Button>
       </div>
     </Modal>
