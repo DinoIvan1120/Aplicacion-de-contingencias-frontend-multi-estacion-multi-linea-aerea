@@ -15,13 +15,18 @@ import styles from "./BotonImprimirTicket.module.css";
  * Cada opción define CÓMO se imprime (método):
  *  - "dialogo": el PDF se abre en una pestaña nueva y se imprime con el
  *    diálogo de impresión del sistema (impresora de mostrador en PC).
- *  - "compartir": SOLO en celular. Se genera el PDF y se abre el menú
- *    "Compartir" del sistema con el ARCHIVO, para enviarlo directo a la app
- *    de la impresora portátil: Zebra Print (Zebra ZQ521) o mPrint (Bixolon
- *    XM7-40). Es más rápido que el diálogo de impresión de Android. Si el
- *    menú no puede abrirse automáticamente, aparece la barra "Ticket listo"
- *    para abrirlo con un toque. En PC, o si el navegador no permite
- *    compartir archivos, se usa el método "dialogo".
+ *  - "compartir": SOLO en celular. Se genera el ticket y se abre el menú
+ *    "Compartir" del sistema con el ARCHIVO. El agente elige "Imprimir"
+ *    (servicio Zebra Print → ZQ521) o mPrint (Bixolon XM7-40).
+ *    El ticket se comparte como IMAGEN PNG (no PDF): el servicio Zebra
+ *    Print imprime imágenes sin problema pero falla con PDF ("No hay
+ *    conexión con la impresora"). La imagen se genera en el navegador con
+ *    PDF.js a la resolución de la impresora (203 dpi) y en blanco/negro
+ *    puro, para que el texto y el QR salgan nítidos en papel térmico.
+ *    Si la conversión falla, se comparte el PDF como respaldo.
+ *    Si el menú no puede abrirse automáticamente, aparece la barra
+ *    "Ticket listo" para abrirlo con un toque. En PC, o si el navegador no
+ *    permite compartir archivos, se usa el método "dialogo".
  *
  * Props:
  *  - atencionId     id de la atención (obligatorio)
@@ -49,7 +54,7 @@ const OPCIONES = [
     ancho: 104,
     metodo: "compartir",
     titulo: "Rollo 104 mm",
-    detalle: "Impresora portátil (Zebra Print / mPrint)",
+    detalle: "Impresora portátil (Zebra / Bixolon)",
   },
 ];
 
@@ -81,6 +86,107 @@ function guardarOpcion(id) {
   } catch {
     /* sin localStorage: se usa el valor en memoria */
   }
+}
+
+// ── Conversión PDF → imagen PNG (solo para compartir en celular) ──────────
+
+const PDFJS_VERSION = "3.11.174";
+const PDFJS_BASE = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
+/** Resolución de las impresoras térmicas portátiles (ZQ521, XM7-40). */
+const DPI_IMPRESORA = 203;
+/** Umbral blanco/negro (0-255): por debajo se imprime negro. */
+const UMBRAL_NEGRO = 160;
+
+let promesaPdfJs = null;
+
+/** Carga PDF.js una sola vez desde cdnjs (solo cuando se necesita). */
+function cargarPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (!promesaPdfJs) {
+    promesaPdfJs = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `${PDFJS_BASE}/pdf.min.js`;
+      script.async = true;
+      script.onload = () => {
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.js`;
+          resolve(window.pdfjsLib);
+        } else {
+          promesaPdfJs = null;
+          reject(new Error("PDF.js no disponible"));
+        }
+      };
+      script.onerror = () => {
+        promesaPdfJs = null;
+        reject(new Error("No se pudo cargar PDF.js"));
+      };
+      document.head.appendChild(script);
+    });
+  }
+  return promesaPdfJs;
+}
+
+/** Deja cada píxel en blanco o negro puro (nitidez en papel térmico). */
+function aBlancoYNegro(canvas) {
+  const ctx = canvas.getContext("2d");
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const luz = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    const v = luz < UMBRAL_NEGRO ? 0 : 255;
+    d[i] = d[i + 1] = d[i + 2] = v;
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/**
+ * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi.
+ * Si el PDF tuviera varias páginas (grupo muy grande), se apilan una
+ * debajo de otra en la misma imagen.
+ */
+async function pdfAImagen(datosPdf, nombreBase) {
+  const pdfjsLib = await cargarPdfJs();
+  const pdf = await pdfjsLib.getDocument({
+    data: new Uint8Array(datosPdf),
+    standardFontDataUrl: `${PDFJS_BASE}/standard_fonts/`,
+  }).promise;
+
+  const escala = DPI_IMPRESORA / 72;
+  const paginas = [];
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const pagina = await pdf.getPage(n);
+    const vista = pagina.getViewport({ scale: escala });
+    const lienzo = document.createElement("canvas");
+    lienzo.width = Math.ceil(vista.width);
+    lienzo.height = Math.ceil(vista.height);
+    const ctx = lienzo.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+    await pagina.render({ canvasContext: ctx, viewport: vista }).promise;
+    paginas.push(lienzo);
+  }
+
+  const final = document.createElement("canvas");
+  final.width = Math.max(...paginas.map((c) => c.width));
+  final.height = paginas.reduce((total, c) => total + c.height, 0);
+  const ctxFinal = final.getContext("2d");
+  ctxFinal.fillStyle = "#ffffff";
+  ctxFinal.fillRect(0, 0, final.width, final.height);
+  let y = 0;
+  for (const c of paginas) {
+    ctxFinal.drawImage(c, 0, y);
+    y += c.height;
+  }
+  aBlancoYNegro(final);
+
+  const blob = await new Promise((resolve, reject) =>
+    final.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("No se pudo crear la imagen"))),
+      "image/png",
+    ),
+  );
+  return new File([blob], `${nombreBase}.png`, { type: "image/png" });
 }
 
 /** Con responseType "blob", el JSON de error del backend también llega como Blob. */
@@ -154,7 +260,7 @@ export default function BotonImprimirTicket({
   }, [panelAbierto]);
 
   /**
-   * Abre el menú "Compartir" del sistema con el PDF (Zebra Print / mPrint).
+   * Abre el menú "Compartir" del sistema con el ticket (imagen o PDF).
    * - AbortError: el agente cerró el menú sin elegir app → no se hace nada.
    * - NotAllowedError: expiró el gesto del usuario → se muestra la barra
    *   "Ticket listo" para abrirlo con un toque.
@@ -178,14 +284,25 @@ export default function BotonImprimirTicket({
     }
   };
 
-  /** Método "compartir": generar el PDF y enviarlo a Zebra Print o mPrint. */
+  /**
+   * Método "compartir": generar el ticket, convertirlo a imagen PNG y
+   * compartirlo (Imprimir → Zebra Print, o mPrint). Si la conversión
+   * falla, se comparte el PDF.
+   */
   const imprimirCompartiendo = async (ancho) => {
     setArchivoPendiente(null);
     setCargando(true);
     let archivo;
     try {
       const res = await atencionesApi.descargarVoucherTicket(atencionId, ancho);
-      archivo = new File([res.data], `ticket-${atencionId}.pdf`, { type: "application/pdf" });
+      const nombreBase = `ticket-${atencionId}`;
+      try {
+        const datos = res.data instanceof Blob ? await res.data.arrayBuffer() : res.data;
+        archivo = await pdfAImagen(datos, nombreBase);
+      } catch (errImagen) {
+        console.warn("No se pudo convertir el ticket a imagen; se comparte el PDF.", errImagen);
+        archivo = new File([res.data], `${nombreBase}.pdf`, { type: "application/pdf" });
+      }
     } catch (err) {
       const msg = await mensajeDeError(err);
       if (onError) onError(msg);
@@ -338,7 +455,7 @@ export default function BotonImprimirTicket({
         )}
 
       {/* Barra "Ticket listo": aparece si el menú Compartir no pudo abrirse
-          automáticamente. Un toque lo abre con el PDF. */}
+          automáticamente. Un toque lo abre con el ticket. */}
       {archivoPendiente &&
         createPortal(
           <div
