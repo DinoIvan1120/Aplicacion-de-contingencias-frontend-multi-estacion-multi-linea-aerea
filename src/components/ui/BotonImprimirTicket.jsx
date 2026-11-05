@@ -94,8 +94,39 @@ const PDFJS_VERSION = "3.11.174";
 const PDFJS_BASE = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
 /** Resolución de las impresoras térmicas portátiles (ZQ521, XM7-40). */
 const DPI_IMPRESORA = 203;
-/** Umbral blanco/negro (0-255): por debajo se imprime negro. */
-const UMBRAL_NEGRO = 160;
+/**
+ * Umbral blanco/negro (0-255): por debajo se imprime negro. Alto (200)
+ * para que los logos de colores claros (pasados a gris en el backend) no
+ * desaparezcan; el texto y el QR ya son negros y no se ven afectados.
+ */
+const UMBRAL_NEGRO = 200;
+/**
+ * Hoja configurada en Zebra Print (DEMO STG): 103.98 mm de ancho,
+ * "Longitud variable" ACTIVADA y "Longitud de la vista previa" en el
+ * MÁXIMO permitido, 990.6 mm.
+ *
+ * La impresión de imágenes de Android RELLENA la hoja: amplía la imagen
+ * hasta cubrirla y recorta lo que sobra. Por eso la imagen se arma con la
+ * proporción de la hoja MÁS LARGA posible (990.6 mm): siempre es igual o
+ * más alta que la hoja real, así Android la ajusta al ANCHO (nunca recorta
+ * los costados) y lo único que puede recortar es blanco del final.
+ * El ticket queda arriba a tamaño real y, con "Longitud variable", la
+ * impresora no imprime el blanco final: cada ticket sale con su largo real
+ * (individual o grupal de cualquier cantidad de pasajeros).
+ */
+const HOJA_ANCHO_MM = 103.98;
+const HOJA_LARGO_MM = 990.6;
+/**
+ * Márgenes en blanco alrededor del ticket dentro de la imagen:
+ *  - arriba: si la impresora o Android recortan unos milímetros al inicio,
+ *    se pierde blanco y no el logo;
+ *  - abajo: las últimas líneas pasan la barra de corte antes de cortar.
+ *    Al final de este margen se dibuja una línea punteada de corte: como
+ *    "Longitud variable" no imprime el blanco final, la línea obliga a la
+ *    impresora a avanzar hasta ahí (y sirve de guía para cortar).
+ */
+const MARGEN_SUPERIOR_MM = 5;
+const MARGEN_INFERIOR_MM = 20;
 
 let promesaPdfJs = null;
 
@@ -141,7 +172,8 @@ function aBlancoYNegro(canvas) {
 }
 
 /**
- * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi.
+ * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi, con la
+ * proporción de la hoja más larga de Zebra Print (103.98 x 990.6 mm).
  * Si el PDF tuviera varias páginas (grupo muy grande), se apilan una
  * debajo de otra en la misma imagen.
  */
@@ -167,17 +199,49 @@ async function pdfAImagen(datosPdf, nombreBase) {
     paginas.push(lienzo);
   }
 
+  // Tamaño del contenido (páginas apiladas) + márgenes arriba y abajo
+  const pxPorMm = DPI_IMPRESORA / 25.4;
+  const margenSuperior = Math.round(MARGEN_SUPERIOR_MM * pxPorMm);
+  const margenInferior = Math.round(MARGEN_INFERIOR_MM * pxPorMm);
+  const anchoContenido = Math.max(...paginas.map((c) => c.width));
+  const altoContenido =
+    margenSuperior + paginas.reduce((total, c) => total + c.height, 0) + margenInferior;
+
+  // Lienzo con la proporción exacta de la hoja (ver HOJA_LARGO_MM):
+  //  - ticket más corto que la hoja → se completa con blanco abajo
+  //    (sale a tamaño real, ocupando todo el ancho);
+  //  - ticket más largo (grupal grande) → se agregan márgenes blancos a
+  //    los lados (sale completo, un poco reducido, sin cortarse).
+  const proporcion = HOJA_LARGO_MM / HOJA_ANCHO_MM;
+  let anchoFinal = anchoContenido;
+  let altoFinal = Math.round(anchoContenido * proporcion);
+  if (altoContenido > altoFinal) {
+    altoFinal = altoContenido;
+    anchoFinal = Math.round(altoContenido / proporcion);
+  }
+
   const final = document.createElement("canvas");
-  final.width = Math.max(...paginas.map((c) => c.width));
-  final.height = paginas.reduce((total, c) => total + c.height, 0);
+  final.width = anchoFinal;
+  final.height = altoFinal;
   const ctxFinal = final.getContext("2d");
   ctxFinal.fillStyle = "#ffffff";
   ctxFinal.fillRect(0, 0, final.width, final.height);
-  let y = 0;
+  let y = margenSuperior;
+  const x = Math.round((anchoFinal - anchoContenido) / 2);
   for (const c of paginas) {
-    ctxFinal.drawImage(c, 0, y);
+    ctxFinal.drawImage(c, x, y);
     y += c.height;
   }
+
+  // Línea punteada de corte al final del margen inferior
+  const grosorLinea = Math.max(2, Math.round(0.4 * pxPorMm));
+  const yLinea = y + margenInferior - grosorLinea;
+  const largoGuion = Math.round(2 * pxPorMm);
+  ctxFinal.fillStyle = "#000000";
+  for (let xi = x; xi < x + anchoContenido; xi += largoGuion * 2) {
+    ctxFinal.fillRect(xi, yLinea, largoGuion, grosorLinea);
+  }
+
   aBlancoYNegro(final);
 
   const blob = await new Promise((resolve, reject) =>
