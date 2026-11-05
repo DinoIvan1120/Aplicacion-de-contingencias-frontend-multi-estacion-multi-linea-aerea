@@ -8,20 +8,20 @@ import styles from "./BotonImprimirTicket.module.css";
 /**
  * Botón "Imprimir ticket" (voucher en formato rollo térmico).
  *
- * Al tocarlo se abre un panel para elegir la impresora / ancho del rollo.
+ * Al tocarlo se abre un panel para elegir el ancho del rollo (80 / 104 mm).
  * La última opción usada queda marcada y se recuerda en el navegador.
  * Si la atención pertenece a un grupo, el backend devuelve el ticket GRUPAL.
  *
  * Cada opción define CÓMO se imprime (método):
  *  - "dialogo": el PDF se abre en una pestaña nueva y se imprime con el
- *    diálogo de impresión del sistema. Es el flujo de la impresora de
- *    mostrador (PC) y de la Zebra ZQ521 en el celular, que imprime con el
- *    servicio de impresión de Zebra (Zebra Technologies) de Android.
+ *    diálogo de impresión del sistema (impresora de mostrador en PC).
  *  - "compartir": SOLO en celular. Se genera el PDF y se abre el menú
- *    "Compartir" del sistema con el ARCHIVO para enviarlo a la app mPrint
- *    (Bixolon XM7-40). Si el menú no puede abrirse automáticamente, aparece
- *    la barra "Ticket listo" para abrirlo con un toque. En PC, o si el
- *    navegador no permite compartir archivos, se usa el método "dialogo".
+ *    "Compartir" del sistema con el ARCHIVO, para enviarlo directo a la app
+ *    de la impresora portátil: Zebra Print (Zebra ZQ521) o mPrint (Bixolon
+ *    XM7-40). Es más rápido que el diálogo de impresión de Android. Si el
+ *    menú no puede abrirse automáticamente, aparece la barra "Ticket listo"
+ *    para abrirlo con un toque. En PC, o si el navegador no permite
+ *    compartir archivos, se usa el método "dialogo".
  *
  * Props:
  *  - atencionId     id de la atención (obligatorio)
@@ -31,7 +31,7 @@ import styles from "./BotonImprimirTicket.module.css";
  *  - onError(msg)   callback para mostrar el error con el modal de la página
  */
 
-/** Clave nueva: guarda el id de la opción (impresora + ancho). */
+/** Guarda el id de la opción elegida. */
 const CLAVE_OPCION = "saasa.ticket.opcion";
 /** Clave anterior: solo guardaba el ancho (80 / 104). Se migra al leer. */
 const CLAVE_ANCHO_ANTERIOR = "saasa.ticket.ancho";
@@ -45,18 +45,11 @@ const OPCIONES = [
     detalle: "Impresora de mostrador",
   },
   {
-    id: "104-zebra",
-    ancho: 104,
-    metodo: "dialogo",
-    titulo: "Rollo 104 mm · Zebra",
-    detalle: "Impresora portátil Zebra ZQ521",
-  },
-  {
-    id: "104-bixolon",
+    id: "104",
     ancho: 104,
     metodo: "compartir",
-    titulo: "Rollo 104 mm · Bixolon",
-    detalle: "Bixolon XM7-40 (app mPrint)",
+    titulo: "Rollo 104 mm",
+    detalle: "Impresora portátil (Zebra Print / mPrint)",
   },
 ];
 
@@ -71,10 +64,10 @@ function leerOpcionGuardada() {
     const guardada = window.localStorage.getItem(CLAVE_OPCION);
     if (OPCIONES.some((o) => o.id === guardada)) return guardada;
 
-    // Migración: antes solo se guardaba el ancho. 104 pasa a la Zebra,
-    // que es la impresora portátil vigente.
+    // Migración de versiones anteriores (ids por impresora o solo ancho).
+    if (guardada === "104-zebra" || guardada === "104-bixolon") return "104";
     const anchoAnterior = Number(window.localStorage.getItem(CLAVE_ANCHO_ANTERIOR));
-    if (anchoAnterior === 104) return "104-zebra";
+    if (anchoAnterior === 104) return "104";
     if (anchoAnterior === 80) return "80";
   } catch {
     /* sin localStorage: se usa el valor por defecto */
@@ -161,7 +154,7 @@ export default function BotonImprimirTicket({
   }, [panelAbierto]);
 
   /**
-   * Abre el menú "Compartir" del sistema con el PDF (flujo Bixolon / mPrint).
+   * Abre el menú "Compartir" del sistema con el PDF (Zebra Print / mPrint).
    * - AbortError: el agente cerró el menú sin elegir app → no se hace nada.
    * - NotAllowedError: expiró el gesto del usuario → se muestra la barra
    *   "Ticket listo" para abrirlo con un toque.
@@ -185,7 +178,7 @@ export default function BotonImprimirTicket({
     }
   };
 
-  /** Método "compartir": generar el PDF y enviarlo a mPrint (Bixolon). */
+  /** Método "compartir": generar el PDF y enviarlo a Zebra Print o mPrint. */
   const imprimirCompartiendo = async (ancho) => {
     setArchivoPendiente(null);
     setCargando(true);
@@ -205,7 +198,7 @@ export default function BotonImprimirTicket({
 
   /**
    * Método "dialogo": abrir el PDF en una pestaña nueva para imprimirlo con
-   * el diálogo del sistema (PC y Zebra ZQ521 en el celular).
+   * el diálogo del sistema (impresora de mostrador en PC).
    */
   const imprimirEnPestana = async (ancho) => {
     // La pestaña se abre dentro del clic (antes del await): si se abre
@@ -305,7 +298,7 @@ export default function BotonImprimirTicket({
                 </button>
               </div>
               <p className={styles.panelDesc}>
-                Elige la impresora y el ancho del rollo.
+                Elige el ancho del rollo de la impresora.
               </p>
 
               <div className={styles.opciones}>
@@ -344,8 +337,8 @@ export default function BotonImprimirTicket({
           document.body,
         )}
 
-      {/* Barra "Ticket listo" (solo flujo Bixolon / mPrint): aparece si el
-          menú Compartir no pudo abrirse automáticamente. Un toque lo abre. */}
+      {/* Barra "Ticket listo": aparece si el menú Compartir no pudo abrirse
+          automáticamente. Un toque lo abre con el PDF. */}
       {archivoPendiente &&
         createPortal(
           <div
@@ -384,7 +377,7 @@ export default function BotonImprimirTicket({
                 cursor: "pointer",
               }}
             >
-              Imprimir con mPrint
+              Imprimir
             </button>
             <button
               type="button"
