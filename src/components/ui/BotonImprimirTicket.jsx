@@ -8,20 +8,20 @@ import styles from "./BotonImprimirTicket.module.css";
 /**
  * Botón "Imprimir ticket" (voucher en formato rollo térmico).
  *
- * Al tocarlo se abre un panel para elegir el ancho del rollo (80 / 104 mm).
+ * Al tocarlo se abre un panel para elegir la impresora / ancho del rollo.
  * La última opción usada queda marcada y se recuerda en el navegador.
  * Si la atención pertenece a un grupo, el backend devuelve el ticket GRUPAL.
  *
- * Comportamiento según el dispositivo:
- *  - Celular/tablet (Android/iOS) con soporte para compartir archivos:
- *    se genera el PDF y se abre el menú "Compartir" del sistema con el
- *    ARCHIVO (no el enlace blob:, que otras apps no pueden abrir). El agente
- *    elige mPrint (Bixolon) y el ticket se imprime directo, sin pasar por el
- *    diálogo de impresión de Android.
- *    Si el navegador no permite abrir el menú automáticamente (por ejemplo,
- *    porque la generación tardó y expiró el gesto del usuario), se muestra
- *    una barra "Ticket listo" con un botón para abrirlo con un toque.
- *  - PC: igual que antes, el PDF se abre en una pestaña nueva para imprimir.
+ * Cada opción define CÓMO se imprime (método):
+ *  - "dialogo": el PDF se abre en una pestaña nueva y se imprime con el
+ *    diálogo de impresión del sistema. Es el flujo de la impresora de
+ *    mostrador (PC) y de la Zebra ZQ521 en el celular, que imprime con el
+ *    servicio de impresión de Zebra (Zebra Technologies) de Android.
+ *  - "compartir": SOLO en celular. Se genera el PDF y se abre el menú
+ *    "Compartir" del sistema con el ARCHIVO para enviarlo a la app mPrint
+ *    (Bixolon XM7-40). Si el menú no puede abrirse automáticamente, aparece
+ *    la barra "Ticket listo" para abrirlo con un toque. En PC, o si el
+ *    navegador no permite compartir archivos, se usa el método "dialogo".
  *
  * Props:
  *  - atencionId     id de la atención (obligatorio)
@@ -31,25 +31,60 @@ import styles from "./BotonImprimirTicket.module.css";
  *  - onError(msg)   callback para mostrar el error con el modal de la página
  */
 
-const CLAVE_ANCHO = "saasa.ticket.ancho";
+/** Clave nueva: guarda el id de la opción (impresora + ancho). */
+const CLAVE_OPCION = "saasa.ticket.opcion";
+/** Clave anterior: solo guardaba el ancho (80 / 104). Se migra al leer. */
+const CLAVE_ANCHO_ANTERIOR = "saasa.ticket.ancho";
 
 const OPCIONES = [
-  { ancho: 80, titulo: "Rollo 80 mm", detalle: "Impresora de mostrador" },
-  { ancho: 104, titulo: "Rollo 104 mm", detalle: "Impresora portátil (Bixolon / Zebra)" },
+  {
+    id: "80",
+    ancho: 80,
+    metodo: "dialogo",
+    titulo: "Rollo 80 mm",
+    detalle: "Impresora de mostrador",
+  },
+  {
+    id: "104-zebra",
+    ancho: 104,
+    metodo: "dialogo",
+    titulo: "Rollo 104 mm · Zebra",
+    detalle: "Impresora portátil Zebra ZQ521",
+  },
+  {
+    id: "104-bixolon",
+    ancho: 104,
+    metodo: "compartir",
+    titulo: "Rollo 104 mm · Bixolon",
+    detalle: "Bixolon XM7-40 (app mPrint)",
+  },
 ];
 
-function leerAnchoGuardado() {
-  try {
-    const v = Number(window.localStorage.getItem(CLAVE_ANCHO));
-    return OPCIONES.some((o) => o.ancho === v) ? v : 80;
-  } catch {
-    return 80;
-  }
+const OPCION_POR_DEFECTO = "80";
+
+function buscarOpcion(id) {
+  return OPCIONES.find((o) => o.id === id) ?? OPCIONES.find((o) => o.id === OPCION_POR_DEFECTO);
 }
 
-function guardarAncho(ancho) {
+function leerOpcionGuardada() {
   try {
-    window.localStorage.setItem(CLAVE_ANCHO, String(ancho));
+    const guardada = window.localStorage.getItem(CLAVE_OPCION);
+    if (OPCIONES.some((o) => o.id === guardada)) return guardada;
+
+    // Migración: antes solo se guardaba el ancho. 104 pasa a la Zebra,
+    // que es la impresora portátil vigente.
+    const anchoAnterior = Number(window.localStorage.getItem(CLAVE_ANCHO_ANTERIOR));
+    if (anchoAnterior === 104) return "104-zebra";
+    if (anchoAnterior === 80) return "80";
+  } catch {
+    /* sin localStorage: se usa el valor por defecto */
+  }
+  return OPCION_POR_DEFECTO;
+}
+
+function guardarOpcion(id) {
+  try {
+    window.localStorage.setItem(CLAVE_OPCION, id);
   } catch {
     /* sin localStorage: se usa el valor en memoria */
   }
@@ -112,7 +147,7 @@ export default function BotonImprimirTicket({
   onError,
 }) {
   const [panelAbierto, setPanelAbierto] = useState(false);
-  const [ultimoAncho, setUltimoAncho] = useState(leerAnchoGuardado);
+  const [ultimaOpcion, setUltimaOpcion] = useState(leerOpcionGuardada);
   const [cargando, setCargando] = useState(false);
   // PDF ya generado que espera un toque del agente para abrir "Compartir".
   const [archivoPendiente, setArchivoPendiente] = useState(null);
@@ -126,7 +161,7 @@ export default function BotonImprimirTicket({
   }, [panelAbierto]);
 
   /**
-   * Abre el menú "Compartir" del sistema con el PDF.
+   * Abre el menú "Compartir" del sistema con el PDF (flujo Bixolon / mPrint).
    * - AbortError: el agente cerró el menú sin elegir app → no se hace nada.
    * - NotAllowedError: expiró el gesto del usuario → se muestra la barra
    *   "Ticket listo" para abrirlo con un toque.
@@ -150,7 +185,7 @@ export default function BotonImprimirTicket({
     }
   };
 
-  /** Flujo para celular: generar el PDF y compartirlo directo con mPrint. */
+  /** Método "compartir": generar el PDF y enviarlo a mPrint (Bixolon). */
   const imprimirCompartiendo = async (ancho) => {
     setArchivoPendiente(null);
     setCargando(true);
@@ -168,8 +203,11 @@ export default function BotonImprimirTicket({
     await compartirArchivo(archivo);
   };
 
-  /** Flujo para PC: abrir el PDF en una pestaña nueva (sin cambios). */
-  const imprimirEnPestana = async () => {
+  /**
+   * Método "dialogo": abrir el PDF en una pestaña nueva para imprimirlo con
+   * el diálogo del sistema (PC y Zebra ZQ521 en el celular).
+   */
+  const imprimirEnPestana = async (ancho) => {
     // La pestaña se abre dentro del clic (antes del await): si se abre
     // después, el navegador la bloquea como popup.
     const pestana = window.open("", "_blank");
@@ -181,7 +219,7 @@ export default function BotonImprimirTicket({
 
     setCargando(true);
     try {
-      const res = await atencionesApi.descargarVoucherTicket(atencionId, ultimoAnchoRef.actual);
+      const res = await atencionesApi.descargarVoucherTicket(atencionId, ancho);
       const blob = new Blob([res.data], { type: "application/pdf" });
 
       if (pestana) {
@@ -201,22 +239,20 @@ export default function BotonImprimirTicket({
     }
   };
 
-  // Ancho elegido en el clic actual (evita depender del re-render del estado).
-  const ultimoAnchoRef = { actual: ultimoAncho };
-
-  const imprimir = async (ancho) => {
+  const imprimir = async (opcion) => {
     if (!atencionId || cargando) return;
     setPanelAbierto(false);
-    setUltimoAncho(ancho);
-    guardarAncho(ancho);
-    ultimoAnchoRef.actual = ancho;
+    setUltimaOpcion(opcion.id);
+    guardarOpcion(opcion.id);
 
-    if (esMovil() && puedeCompartirArchivos()) {
-      await imprimirCompartiendo(ancho);
+    if (opcion.metodo === "compartir" && esMovil() && puedeCompartirArchivos()) {
+      await imprimirCompartiendo(opcion.ancho);
     } else {
-      await imprimirEnPestana();
+      await imprimirEnPestana(opcion.ancho);
     }
   };
+
+  const opcionActiva = buscarOpcion(ultimaOpcion);
 
   const clasesWrap = [
     styles.wrap,
@@ -269,18 +305,18 @@ export default function BotonImprimirTicket({
                 </button>
               </div>
               <p className={styles.panelDesc}>
-                Elige el ancho del rollo de la impresora.
+                Elige la impresora y el ancho del rollo.
               </p>
 
               <div className={styles.opciones}>
                 {OPCIONES.map((o) => {
-                  const activo = o.ancho === ultimoAncho;
+                  const activo = o.id === opcionActiva.id;
                   return (
                     <button
-                      key={o.ancho}
+                      key={o.id}
                       type="button"
                       className={`${styles.opcion} ${activo ? styles.opcionActiva : ""}`}
-                      onClick={() => imprimir(o.ancho)}
+                      onClick={() => imprimir(o)}
                       autoFocus={activo}
                     >
                       <span className={styles.opcionTexto}>
@@ -308,8 +344,8 @@ export default function BotonImprimirTicket({
           document.body,
         )}
 
-      {/* Barra "Ticket listo": aparece solo si el menú Compartir no pudo
-          abrirse automáticamente. Un toque lo abre con el PDF. */}
+      {/* Barra "Ticket listo" (solo flujo Bixolon / mPrint): aparece si el
+          menú Compartir no pudo abrirse automáticamente. Un toque lo abre. */}
       {archivoPendiente &&
         createPortal(
           <div
