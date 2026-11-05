@@ -101,29 +101,27 @@ const DPI_IMPRESORA = 203;
  */
 const UMBRAL_NEGRO = 200;
 /**
- * Hoja configurada en Zebra Print (DEMO STG): 103.98 mm de ancho,
- * "Longitud variable" ACTIVADA y "Longitud de la vista previa" en el
- * MÁXIMO permitido, 990.6 mm.
+ * Hoja configurada en Zebra Print (DEMO STG): 103.98 x 254 mm, tipo
+ * Continuous y "Longitud variable" DESACTIVADA.
  *
  * La impresión de imágenes de Android RELLENA la hoja: amplía la imagen
- * hasta cubrirla y recorta lo que sobra. Por eso la imagen se arma con la
- * proporción de la hoja MÁS LARGA posible (990.6 mm): siempre es igual o
- * más alta que la hoja real, así Android la ajusta al ANCHO (nunca recorta
- * los costados) y lo único que puede recortar es blanco del final.
- * El ticket queda arriba a tamaño real y, con "Longitud variable", la
- * impresora no imprime el blanco final: cada ticket sale con su largo real
- * (individual o grupal de cualquier cantidad de pasajeros).
+ * hasta cubrirla y recorta lo que sobra, centrado (arriba/abajo o a los
+ * lados). Por eso la imagen se arma con EXACTAMENTE la proporción de la
+ * hoja: así no se recorta nada.
+ *  - Ticket individual: sale prácticamente a tamaño real.
+ *  - Ticket grupal más largo que la hoja: sale completo, reducido para
+ *    entrar en los 254 mm.
+ * Si se cambia la longitud en Zebra Print, hay que cambiarla aquí también.
  */
 const HOJA_ANCHO_MM = 103.98;
-const HOJA_LARGO_MM = 990.6;
+const HOJA_LARGO_MM = 254;
 /**
  * Márgenes en blanco alrededor del ticket dentro de la imagen:
  *  - arriba: si la impresora o Android recortan unos milímetros al inicio,
  *    se pierde blanco y no el logo;
  *  - abajo: las últimas líneas pasan la barra de corte antes de cortar.
- *    Al final de este margen se dibuja una línea punteada de corte: como
- *    "Longitud variable" no imprime el blanco final, la línea obliga a la
- *    impresora a avanzar hasta ahí (y sirve de guía para cortar).
+ *    Al final de este margen se dibuja una línea punteada como guía de
+ *    corte.
  */
 const MARGEN_SUPERIOR_MM = 5;
 const MARGEN_INFERIOR_MM = 20;
@@ -173,7 +171,7 @@ function aBlancoYNegro(canvas) {
 
 /**
  * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi, con la
- * proporción de la hoja más larga de Zebra Print (103.98 x 990.6 mm).
+ * proporción de la hoja configurada en Zebra Print (103.98 x 254 mm).
  * Si el PDF tuviera varias páginas (grupo muy grande), se apilan una
  * debajo de otra en la misma imagen.
  */
