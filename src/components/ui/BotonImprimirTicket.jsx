@@ -8,7 +8,10 @@ import styles from "./BotonImprimirTicket.module.css";
 /**
  * Botón "Imprimir ticket" (voucher en formato rollo térmico).
  *
- * Al tocarlo se abre un panel para elegir el ancho del rollo (80 / 104 mm).
+ * Al tocarlo se abre un panel para elegir el rollo / impresora:
+ *  - 80 mm mostrador (PC, diálogo de impresión)
+ *  - 80 mm portátil Zebra (ZQ521 con rollo de 80 mm)
+ *  - 104 mm portátil (rollo de 4")
  * La última opción usada queda marcada y se recuerda en el navegador.
  * Si la atención pertenece a un grupo, el backend devuelve el ticket GRUPAL.
  *
@@ -41,6 +44,13 @@ const CLAVE_OPCION = "saasa.ticket.opcion";
 /** Clave anterior: solo guardaba el ancho (80 / 104). Se migra al leer. */
 const CLAVE_ANCHO_ANTERIOR = "saasa.ticket.ancho";
 
+/**
+ * Cada opción portátil ("compartir") lleva la HOJA configurada en Zebra
+ * Print para esa impresora (ancho x largo en mm). La imagen del ticket se
+ * arma con EXACTAMENTE esa proporción y con el ancho físico del rollo:
+ * si la hoja de Zebra Print y estos valores no coinciden, el ticket sale
+ * recortado o reducido.
+ */
 const OPCIONES = [
   {
     id: "80",
@@ -50,11 +60,20 @@ const OPCIONES = [
     detalle: "Impresora de mostrador",
   },
   {
+    id: "80-zebra",
+    ancho: 80,
+    metodo: "compartir",
+    hoja: { anchoMm: 80, largoMm: 254 },
+    titulo: "Rollo 80 mm portátil",
+    detalle: "Impresora portátil Zebra (ZQ521)",
+  },
+  {
     id: "104",
     ancho: 104,
     metodo: "compartir",
+    hoja: { anchoMm: 103.98, largoMm: 254 },
     titulo: "Rollo 104 mm",
-    detalle: "Impresora portátil (Zebra / Bixolon)",
+    detalle: "Impresora portátil 4\" (Zebra / Bixolon)",
   },
 ];
 
@@ -70,7 +89,8 @@ function leerOpcionGuardada() {
     if (OPCIONES.some((o) => o.id === guardada)) return guardada;
 
     // Migración de versiones anteriores (ids por impresora o solo ancho).
-    if (guardada === "104-zebra" || guardada === "104-bixolon") return "104";
+    if (guardada === "104-zebra") return "80-zebra";
+    if (guardada === "104-bixolon") return "104";
     const anchoAnterior = Number(window.localStorage.getItem(CLAVE_ANCHO_ANTERIOR));
     if (anchoAnterior === 104) return "104";
     if (anchoAnterior === 80) return "80";
@@ -101,20 +121,22 @@ const DPI_IMPRESORA = 203;
  */
 const UMBRAL_NEGRO = 200;
 /**
- * Hoja configurada en Zebra Print (DEMO STG): 103.98 x 254 mm, tipo
- * Continuous y "Longitud variable" DESACTIVADA.
- *
- * La impresión de imágenes de Android RELLENA la hoja: amplía la imagen
- * hasta cubrirla y recorta lo que sobra, centrado (arriba/abajo o a los
- * lados). Por eso la imagen se arma con EXACTAMENTE la proporción de la
- * hoja: así no se recorta nada.
- *  - Ticket individual: sale prácticamente a tamaño real.
+ * La impresión de imágenes de Android RELLENA la hoja configurada en Zebra
+ * Print (tipo Continuous, "Longitud variable" DESACTIVADA): amplía la
+ * imagen hasta cubrirla y recorta lo que sobra, centrado. Por eso la
+ * imagen se arma con EXACTAMENTE la proporción de la hoja de la opción
+ * elegida (ver OPCIONES[].hoja):
+ *  - Ticket individual: sale a tamaño real, ocupando el ancho del rollo.
  *  - Ticket grupal más largo que la hoja: sale completo, reducido para
- *    entrar en los 254 mm.
- * Si se cambia la longitud en Zebra Print, hay que cambiarla aquí también.
+ *    entrar en el largo de la hoja.
+ * Si se cambia la hoja en Zebra Print, hay que cambiarla en OPCIONES.
  */
-const HOJA_ANCHO_MM = 103.98;
-const HOJA_LARGO_MM = 254;
+/**
+ * Margen lateral en blanco (cada lado) dentro del ancho del rollo. El
+ * contenido del PDF se escala para ocupar TODO el ancho restante, así el
+ * texto (letras incluidas) queda proporcional al rollo y nunca se corta.
+ */
+const MARGEN_LATERAL_MM = 3;
 /**
  * Márgenes en blanco alrededor del ticket dentro de la imagen:
  *  - arriba: si la impresora o Android recortan unos milímetros al inicio,
@@ -170,25 +192,30 @@ function aBlancoYNegro(canvas) {
 }
 
 /**
- * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi, con la
- * proporción de la hoja configurada en Zebra Print (103.98 x 254 mm).
- * Si el PDF tuviera varias páginas (grupo muy grande), se apilan una
- * debajo de otra en la misma imagen.
+ * Convierte el PDF del ticket en UNA imagen PNG a 203 dpi, con el ancho
+ * físico del rollo y la proporción de la hoja configurada en Zebra Print.
+ * Cada página del PDF se escala para ocupar el ancho útil del rollo
+ * (ancho de la hoja menos los márgenes laterales). Si el PDF tuviera
+ * varias páginas (grupo muy grande), se apilan una debajo de otra.
  */
-async function pdfAImagen(datosPdf, nombreBase) {
+async function pdfAImagen(datosPdf, nombreBase, hoja) {
   const pdfjsLib = await cargarPdfJs();
   const pdf = await pdfjsLib.getDocument({
     data: new Uint8Array(datosPdf),
     standardFontDataUrl: `${PDFJS_BASE}/standard_fonts/`,
   }).promise;
 
-  const escala = DPI_IMPRESORA / 72;
+  const pxPorMm = DPI_IMPRESORA / 25.4;
+  const anchoHojaPx = Math.round(hoja.anchoMm * pxPorMm);
+  const anchoUtilPx = Math.round((hoja.anchoMm - 2 * MARGEN_LATERAL_MM) * pxPorMm);
+
   const paginas = [];
   for (let n = 1; n <= pdf.numPages; n++) {
     const pagina = await pdf.getPage(n);
-    const vista = pagina.getViewport({ scale: escala });
+    const base = pagina.getViewport({ scale: 1 });
+    const vista = pagina.getViewport({ scale: anchoUtilPx / base.width });
     const lienzo = document.createElement("canvas");
-    lienzo.width = Math.ceil(vista.width);
+    lienzo.width = anchoUtilPx;
     lienzo.height = Math.ceil(vista.height);
     const ctx = lienzo.getContext("2d");
     ctx.fillStyle = "#ffffff";
@@ -198,21 +225,20 @@ async function pdfAImagen(datosPdf, nombreBase) {
   }
 
   // Tamaño del contenido (páginas apiladas) + márgenes arriba y abajo
-  const pxPorMm = DPI_IMPRESORA / 25.4;
   const margenSuperior = Math.round(MARGEN_SUPERIOR_MM * pxPorMm);
   const margenInferior = Math.round(MARGEN_INFERIOR_MM * pxPorMm);
-  const anchoContenido = Math.max(...paginas.map((c) => c.width));
+  const anchoContenido = anchoUtilPx;
   const altoContenido =
     margenSuperior + paginas.reduce((total, c) => total + c.height, 0) + margenInferior;
 
-  // Lienzo con la proporción exacta de la hoja (ver HOJA_LARGO_MM):
+  // Lienzo con la proporción exacta de la hoja:
   //  - ticket más corto que la hoja → se completa con blanco abajo
-  //    (sale a tamaño real, ocupando todo el ancho);
+  //    (sale a tamaño real, ocupando el ancho del rollo);
   //  - ticket más largo (grupal grande) → se agregan márgenes blancos a
   //    los lados (sale completo, un poco reducido, sin cortarse).
-  const proporcion = HOJA_LARGO_MM / HOJA_ANCHO_MM;
-  let anchoFinal = anchoContenido;
-  let altoFinal = Math.round(anchoContenido * proporcion);
+  const proporcion = hoja.largoMm / hoja.anchoMm;
+  let anchoFinal = anchoHojaPx;
+  let altoFinal = Math.round(anchoHojaPx * proporcion);
   if (altoContenido > altoFinal) {
     altoFinal = altoContenido;
     anchoFinal = Math.round(altoContenido / proporcion);
@@ -351,7 +377,7 @@ export default function BotonImprimirTicket({
    * compartirlo (Imprimir → Zebra Print, o mPrint). Si la conversión
    * falla, se comparte el PDF.
    */
-  const imprimirCompartiendo = async (ancho) => {
+  const imprimirCompartiendo = async (ancho, hoja) => {
     setArchivoPendiente(null);
     setCargando(true);
     let archivo;
@@ -360,7 +386,7 @@ export default function BotonImprimirTicket({
       const nombreBase = `ticket-${atencionId}`;
       try {
         const datos = res.data instanceof Blob ? await res.data.arrayBuffer() : res.data;
-        archivo = await pdfAImagen(datos, nombreBase);
+        archivo = await pdfAImagen(datos, nombreBase, hoja);
       } catch (errImagen) {
         console.warn("No se pudo convertir el ticket a imagen; se comparte el PDF.", errImagen);
         archivo = new File([res.data], `${nombreBase}.pdf`, { type: "application/pdf" });
@@ -418,7 +444,7 @@ export default function BotonImprimirTicket({
     guardarOpcion(opcion.id);
 
     if (opcion.metodo === "compartir" && esMovil() && puedeCompartirArchivos()) {
-      await imprimirCompartiendo(opcion.ancho);
+      await imprimirCompartiendo(opcion.ancho, opcion.hoja);
     } else {
       await imprimirEnPestana(opcion.ancho);
     }
@@ -477,7 +503,7 @@ export default function BotonImprimirTicket({
                 </button>
               </div>
               <p className={styles.panelDesc}>
-                Elige el ancho del rollo de la impresora.
+                Elige el rollo y la impresora.
               </p>
 
               <div className={styles.opciones}>
