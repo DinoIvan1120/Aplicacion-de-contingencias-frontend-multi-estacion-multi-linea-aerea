@@ -11,6 +11,7 @@ import styles from "./BotonImprimirTicket.module.css";
  * Al tocarlo se abre un panel para elegir el rollo / impresora:
  *  - 80 mm mostrador (PC, diálogo de impresión)
  *  - 80 mm portátil Zebra (ZQ521 con rollo de 80 mm)
+ *  - 80 mm portátil Bixolon (XM7-40 con rollo de 80 mm)
  *  - 104 mm portátil (rollo de 4")
  * La última opción usada queda marcada y se recuerda en el navegador.
  * Si la atención pertenece a un grupo, el backend devuelve el ticket GRUPAL.
@@ -45,11 +46,11 @@ const CLAVE_OPCION = "saasa.ticket.opcion";
 const CLAVE_ANCHO_ANTERIOR = "saasa.ticket.ancho";
 
 /**
- * Cada opción portátil ("compartir") lleva la HOJA configurada en Zebra
- * Print para esa impresora (ancho x largo en mm). La imagen del ticket se
- * arma con EXACTAMENTE esa proporción y con el ancho físico del rollo:
- * si la hoja de Zebra Print y estos valores no coinciden, el ticket sale
- * recortado o reducido.
+ * Cada opción portátil ("compartir") lleva la HOJA configurada en la app de
+ * impresión (Zebra Print / mPrint) para esa impresora (ancho x largo en mm).
+ * La imagen del ticket se arma con EXACTAMENTE esa proporción y con el ancho
+ * físico del rollo: si la hoja configurada y estos valores no coinciden, el
+ * ticket sale recortado o reducido.
  */
 const OPCIONES = [
   {
@@ -66,6 +67,14 @@ const OPCIONES = [
     hoja: { anchoMm: 80, largoMm: 254 },
     titulo: "Rollo 80 mm portátil",
     detalle: "Impresora portátil Zebra (ZQ521)",
+  },
+  {
+    id: "80-bixolon",
+    ancho: 80,
+    metodo: "compartir",
+    hoja: { anchoMm: 80, largoMm: 254 },
+    titulo: "Rollo 80 mm portátil",
+    detalle: "Impresora portátil Bixolon (XM7-40)",
   },
   {
     id: "104",
